@@ -14,17 +14,22 @@ using namespace cv;
 int main(int argc, char *argv[])
 {
     // Read in the image
-    // Separate the image, must be flexible, 
-        // allowing to separate into same size or diferent sized smaller chunks
-        
-        // Store references to the image's corners
+    Mat image;
+    image = imread(argv[1], CV_LOAD_IMAGE_COLOR); // Read the file
+    namedWindow("image", WINDOW_AUTOSIZE);
+    imshow("image", image );
+    waitKey();
+    // Separate the image, must be flexible,
+    // allowing to separate into same size or diferent sized smaller chunks
+
+    // Store references to the image's corners
 
     // Send the image to the available machines, to execute the IWPP
-        // When hiting a corner must comunicate with it's neighbours
-    
-        //Stop condition, possibilities:
-            // Either broadcast to all nodes
-            // Broadcast to a node (in a ring like fashion) until all have finished
+    // When hiting a corner must comunicate with it's neighbours
+
+    //Stop condition, possibilities:
+    // Either broadcast to all nodes
+    // Broadcast to a node (in a ring like fashion) until all have finished
 
     separate_image();
 

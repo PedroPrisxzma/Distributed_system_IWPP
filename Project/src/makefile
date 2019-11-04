@@ -1,5 +1,6 @@
 CC = mpic++
 CFLAGS = -Wall 
+CVFLAGS = `pkg-config --cflags --libs opencv`
 TFLAGS = -lpthread 
 Vflags = valgrind --leak-check=full
 
@@ -18,7 +19,7 @@ all : ${BINS}
 
 main : main.cpp
 	@echo "Checking.."
-	$(CC) $(CFLAGS) $(SRCS) `pkg-config opencv --libs` -o main
+	$(CC) $(CFLAGS) $(SRCS) $(CVFLAGS) -o main
 
 run : 
 	$(foreach b, ${BINS}, \
