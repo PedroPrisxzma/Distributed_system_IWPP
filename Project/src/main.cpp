@@ -13,12 +13,6 @@ using namespace cv;
 
 int main(int argc, char *argv[])
 {
-    // Read in the image
-    Mat image;
-    image = imread(argv[1], CV_LOAD_IMAGE_COLOR); // Read the file
-    namedWindow("image", WINDOW_AUTOSIZE);
-    imshow("image", image );
-    waitKey();
     // Separate the image, must be flexible,
     // allowing to separate into same size or diferent sized smaller chunks
 
@@ -30,9 +24,13 @@ int main(int argc, char *argv[])
     //Stop condition, possibilities:
     // Either broadcast to all nodes
     // Broadcast to a node (in a ring like fashion) until all have finished
+    
+    Mat inputImage; 
+    inputImage = image_reader(argc, argv);
+    cout << inputImage.size << endl;
 
-    separate_image();
+    separate_image(inputImage);
 
-    cout << "Hi" << endl;
     return 0;
+
 }
