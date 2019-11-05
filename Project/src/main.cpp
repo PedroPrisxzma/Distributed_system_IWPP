@@ -25,11 +25,18 @@ int main(int argc, char *argv[])
     // Either broadcast to all nodes
     // Broadcast to a node (in a ring like fashion) until all have finished
     
+    if (argc < 3)
+    {
+        cout << " Usage: executable ImageToLoad, no ImageToLoad was provided" << endl;
+        throw std::exception();
+    }
+
+
     Mat inputImage; 
-    inputImage = image_reader(argc, argv);
+    inputImage = image_reader(argv[1]);
     cout << inputImage.size << endl;
 
-    separate_image(inputImage, 5);
+    separate_image(inputImage, atoi(argv[2]));
 
     return 0;
 
