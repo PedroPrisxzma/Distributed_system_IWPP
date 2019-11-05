@@ -42,7 +42,7 @@ Mat image_reader(int argc, char *argv[])
 }
 
 // Separate the image into smaller chunks
-void separate_image(Mat image)
+void separate_image(Mat image, int n_proc)
 {
     int width = image.cols;
     int height = image.rows;
@@ -55,49 +55,59 @@ void separate_image(Mat image)
     cout << "Image Details" << endl;
     printf("Width: %d\nHeight: %d\n",width, height);
 
-    slice_image(image, vertice, mCells, GRID_SIZE);
+    slice_image(image, vertice, mCells, n_proc);
 
     imshow("image", image);
     waitKey();
 }
 
-void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int min_size)
+void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int n_proc)
 {   
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
-
-    if (vertices.sizex <= min_size && vertices.sizey <= min_size)
+    int factor;
+    
+    if (n_proc == 0) return;
+    else
+    if (n_proc == 1)
     {
         Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
         cout << grid_rect<< endl;
         mCells.push_back(grid_rect);
-        rectangle(image, grid_rect, Scalar(0, 255, 0), 1);
+        rectangle(image, grid_rect, Scalar(rand()%256, rand()%256, rand()%256), 1);
         // imshow("image", image);
         //imshow(format("grid(%d,%d)-(%d,%d)", vertices.leftSide,vertices.topSide, vertices.rightSide, vertices.botSide), image(grid_rect));
-        //waitKey();
+        //waitKey();0
     }
-    else if (vertices.sizex < vertices.sizey)
+    else 
+    if (n_proc == 2)
     {
-        int factor =  2 + rand() % (vertices.sizey/10);
+        factor = 2;
+    }
+    else
+    {
+        factor =  2 + rand() % (n_proc-2);
+    }
+
+    if (vertices.sizex < vertices.sizey)
+    {
         cout << "valor de divisao:" << factor << endl << "TamanhoY " << vertices.sizey << endl;
 
         int horizontal_cut = vertices.sizey/factor;
         Vertices v1(vertices.leftSide,vertices.rightSide,vertices.topSide,vertices.topSide+horizontal_cut);
         Vertices v2(vertices.leftSide,vertices.rightSide,vertices.topSide+horizontal_cut,vertices.botSide);
-        slice_image(image, v1, mCells, min_size);
-        slice_image(image, v2, mCells, min_size);
     }
     else
     {
-        int factor =  2 + rand() % (vertices.sizex/10);
         cout << "valor de divisao:" << factor << endl << "TamanhoX " << vertices.sizex << endl;
 
         int vertical_cut = vertices.sizex/(factor);
         Vertices v1(vertices.leftSide,vertices.leftSide+vertical_cut,vertices.topSide,vertices.botSide);
         Vertices v2(vertices.leftSide+vertical_cut,vertices.rightSide,vertices.topSide,vertices.botSide);
-        slice_image(image, v1, mCells, min_size);
-        slice_image(image, v2, mCells, min_size);
     }
+
+    slice_image(image, v1, mCells, n_proc-factor);
+    slice_image(image, v2, mCells, factor);
 }
 
 

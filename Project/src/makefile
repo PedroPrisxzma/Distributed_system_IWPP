@@ -17,7 +17,7 @@ endif
 
 all : ${BINS}
 
-main : main.cpp
+main : ${SRCS}
 	@echo "Checking.."
 	$(CC) $(CFLAGS) $(SRCS) $(CVFLAGS) -o main
 

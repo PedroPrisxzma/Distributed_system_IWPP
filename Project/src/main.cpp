@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     inputImage = image_reader(argc, argv);
     cout << inputImage.size << endl;
 
-    separate_image(inputImage);
+    separate_image(inputImage, 5);
 
     return 0;
 
