@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
-#include "vertices.h"
+#include "../classes/vertices.h"
 
 void separate_image(Mat image, int numProcessos);
 Mat image_reader(char *filename);

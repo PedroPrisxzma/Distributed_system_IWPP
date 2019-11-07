@@ -1,4 +1,4 @@
-##ifndef __MORPHOLOGIC__
+#ifndef __MORPHOLOGIC__
 #define __MORPHOLOGIC__
 
 

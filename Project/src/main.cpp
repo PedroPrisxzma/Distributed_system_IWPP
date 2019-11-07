@@ -25,20 +25,29 @@ int main(int argc, char *argv[])
     //Stop condition, possibilities:
     // Either broadcast to all nodes
     // Broadcast to a node (in a ring like fashion) until all have finished
-    
-    if (argc < 3)
+    int n_procs, rank;
+
+    // Inicia programacao distribuida
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0)
     {
-        cout << " Usage: executable ImageToLoad, no ImageToLoad was provided" << endl;
-        throw std::exception();
+        if (argc < 3)
+        {
+            cout << " Usage: executable ImageToLoad, no ImageToLoad was provided" << endl;
+            throw std::exception();
+        }
+
+        Mat inputImage;
+        inputImage = image_reader(argv[1]);
+        cout << inputImage.size << endl;
+
+        vector<React> imageBlocks = separate_image(inputImage, atoi(argv[2]));
     }
 
-
-    Mat inputImage; 
-    inputImage = image_reader(argv[1]);
-    cout << inputImage.size << endl;
-
-    separate_image(inputImage, atoi(argv[2]));
-
+    // Finaliza programacao distribuida
+    MPI_Finalize();
     return 0;
-
 }

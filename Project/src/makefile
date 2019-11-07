@@ -1,36 +1,16 @@
 CC = mpic++
-CFLAGS = -Wall -I
+CXXFLAGS = -Wall
 CVFLAGS = `pkg-config --cflags --libs opencv` 
 TFLAGS = -lpthread 
-Vflags = valgrind --leak-check=full
 
-SRCS = main.cpp ImageSeparator.cpp  MorphologicOperations.cpp
-CLASSES_SRCS = classes/vertices.cpp
+SRCS = main.cpp 	
+INC_SRCS = classes/vertices.cpp image_handling/ImageSeparator.cpp morphological_algorithms/MorphologicOperations.cpp 
+INC = -I/classes/ -I/image_handling/ -I/morphological_algorithms/
 BINS = main 
 
-# If the first argument is "run"...
-ifeq (run,$(firstword $(MAKECMDGOALS)))
-  # use the rest as arguments for "run"
-  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-  # ...and turn them into do-nothing targets
-  $(eval $(RUN_ARGS):;@:)
-endif
-
-all : ${BINS}
-
-main : ${SRCS}
+main : ${SRCS} ${INC_SRCS}
 	@echo "Checking.."
-	$(CC) $(CFLAGS) $(SRCS) $(CVFLAGS) -o main
-
-run : 
-	$(foreach b, ${BINS}, \
-	mpiexec -n 5 ./$b < input )
-
-val :
-	$(Vflags) ./${RUN_ARGS}
-
-tests :
-	$(Vflags) ./${RUN_ARGS} < \* insert entry tests here*\
+	$(CC) $(CXXFLAGS) $(INC) $(SRCS) $(INC_SRCS) $(CVFLAGS) -o main
 
 clean :
 	rm -rvf *.o ${BINS}

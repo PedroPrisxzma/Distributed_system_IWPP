@@ -6,7 +6,7 @@
 using namespace std;
 #include <mpi.h>
 
-#include "vertices.h"
+#include "../classes/vertices.h"
 
 #include "ImageSeparator.h"
 #include <opencv2/opencv.hpp>
@@ -53,7 +53,7 @@ void separate_image(Mat image, int numProcessos)
     waitKey();
 }
 
-void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
+vector<Rect> slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
 {
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
@@ -111,4 +111,6 @@ void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProce
         slice_image(image, v1, mCells, numProcessos_1);
         slice_image(image, v2, mCells, numProcessos_2);
     }
+
+    return mCells;
 }
