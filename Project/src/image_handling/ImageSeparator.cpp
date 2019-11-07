@@ -34,7 +34,7 @@ Mat image_reader(char *filename)
 }
 
 // Separate the image into smaller chunks
-void separate_image(Mat image, int numProcessos)
+vector<Rect> separate_image(Mat image, int numProcessos)
 {
     int width = image.cols;
     int height = image.rows;
@@ -53,7 +53,7 @@ void separate_image(Mat image, int numProcessos)
     waitKey();
 }
 
-vector<Rect> slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
+void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
 {
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
@@ -111,6 +111,4 @@ vector<Rect> slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int 
         slice_image(image, v1, mCells, numProcessos_1);
         slice_image(image, v2, mCells, numProcessos_2);
     }
-
-    return mCells;
 }

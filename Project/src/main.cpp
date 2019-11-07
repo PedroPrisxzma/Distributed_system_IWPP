@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         inputImage = image_reader(argv[1]);
         cout << inputImage.size << endl;
 
-        vector<React> imageBlocks = separate_image(inputImage, atoi(argv[2]));
+        vector<Rect> imageBlocks = separate_image(inputImage, atoi(argv[2]));
     }
 
     // Finaliza programacao distribuida
