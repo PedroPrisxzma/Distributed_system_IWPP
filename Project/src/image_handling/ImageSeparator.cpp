@@ -6,7 +6,7 @@
 using namespace std;
 #include <mpi.h>
 
-#include "../classes/vertices.h"
+#include "vertices.h"
 
 #include "ImageSeparator.h"
 #include <opencv2/opencv.hpp>

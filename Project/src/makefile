@@ -1,10 +1,11 @@
 CC = mpic++
-CFLAGS = -Wall 
-CVFLAGS = `pkg-config --cflags --libs opencv`
+CFLAGS = -Wall -I
+CVFLAGS = `pkg-config --cflags --libs opencv` 
 TFLAGS = -lpthread 
 Vflags = valgrind --leak-check=full
 
-SRCS = main.cpp ImageSeparator.cpp vertices.cpp
+SRCS = main.cpp ImageSeparator.cpp  MorphologicOperations.cpp
+CLASSES_SRCS = classes/vertices.cpp
 BINS = main 
 
 # If the first argument is "run"...

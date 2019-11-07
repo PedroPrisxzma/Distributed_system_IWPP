@@ -8,7 +8,8 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
-#include "ImageSeparator.h"
+#include "morphological_algorithms/MorphologicOperations.h"
+#include "image_handling/ImageSeparator.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])
