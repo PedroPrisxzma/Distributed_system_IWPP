@@ -5,8 +5,8 @@ using namespace cv;
 
 #include "vertices.h"
 
-void separate_image(Mat image, int n_proc);
+void separate_image(Mat image, int numProcessos);
 Mat image_reader(char *filename);
-void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int n_proc);
+void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos);
 
 #endif
