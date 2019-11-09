@@ -51,6 +51,8 @@ vector<Rect> separate_image(Mat image, int numProcessos)
 
     imshow("image", image);
     waitKey();
+
+    return mCells;
 }
 
 void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
