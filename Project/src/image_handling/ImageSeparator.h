@@ -4,9 +4,10 @@
 using namespace cv;
 
 #include "../classes/vertices.h"
+#include "../classes/imageChunk.h"
 
-vector<Rect> separate_image(Mat image, int numProcessos);
+ImageChunk separate_image(Mat image, int numProcessos);
 Mat image_reader(char *filename);
-void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos);
+void slice_image(Mat image, Vertices vertices, ImageChunk vetorDeBlocos, int numProcessos);
 
 #endif

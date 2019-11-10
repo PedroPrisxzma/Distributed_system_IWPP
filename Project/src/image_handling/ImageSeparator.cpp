@@ -7,6 +7,7 @@ using namespace std;
 #include <mpi.h>
 
 #include "../classes/vertices.h"
+#include "../classes/imageChunk.h"
 
 #include "ImageSeparator.h"
 #include <opencv2/opencv.hpp>
@@ -34,7 +35,7 @@ Mat image_reader(char *filename)
 }
 
 // Separate the image into smaller chunks
-vector<Rect> separate_image(Mat image, int numProcessos)
+ImageChunk separate_image(Mat image, int numProcessos)
 {
     int width = image.cols;
     int height = image.rows;
@@ -42,20 +43,20 @@ vector<Rect> separate_image(Mat image, int numProcessos)
 
     Vertices vertice(0, width, 0, height);
 
-    vector<Rect> mCells;
+    ImageChunk vetorDeBlocos;
 
     //cout << "Image Details" << endl;
     //printf("Width: %d\nHeight: %d\n", width, height);
 
-    slice_image(image, vertice, mCells, numProcessos);
+    slice_image(image, vertice, vetorDeBlocos, numProcessos);
 
     imshow("image", image);
     waitKey();
 
-    return mCells;
+    return vetorDeBlocos;
 }
 
-void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProcessos)
+void slice_image(Mat image, Vertices vertices, ImageChunk vetorDeBlocos, int numProcessos)
 {
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
@@ -66,12 +67,17 @@ void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProce
     else if (numProcessos == 1)
     {
         Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
+        vetorDeBlocos.vetorDeImagens.push_back(grid_rect);
+        vetorDeBlocos.vetorDeVertices.push_back(vertices);
+
+        
         cout << grid_rect << endl;
-        mCells.push_back(grid_rect);
+        
         rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
         // imshow("image", image);
         // imshow(format("grid(%d,%d)-(%d,%d)", vertices.leftSide,vertices.topSide, vertices.rightSide, vertices.botSide), image(grid_rect));
         // waitKey();
+        
         return;
     }
     else if (numProcessos == 2)
@@ -99,8 +105,8 @@ void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProce
         int horizontal_cut = vertices.sizey / factor;
         Vertices v1(vertices.leftSide, vertices.rightSide, vertices.topSide, vertices.topSide + horizontal_cut);
         Vertices v2(vertices.leftSide, vertices.rightSide, vertices.topSide + horizontal_cut, vertices.botSide);
-        slice_image(image, v1, mCells, numProcessos_1);
-        slice_image(image, v2, mCells, numProcessos_2);
+        slice_image(image, v1, vetorDeBlocos, numProcessos_1);
+        slice_image(image, v2, vetorDeBlocos, numProcessos_2);
     }
     else
     {
@@ -110,7 +116,7 @@ void slice_image(Mat image, Vertices vertices, vector<Rect> mCells, int numProce
         int vertical_cut = vertices.sizex / (factor);
         Vertices v1(vertices.leftSide, vertices.leftSide + vertical_cut, vertices.topSide, vertices.botSide);
         Vertices v2(vertices.leftSide + vertical_cut, vertices.rightSide, vertices.topSide, vertices.botSide);
-        slice_image(image, v1, mCells, numProcessos_1);
-        slice_image(image, v2, mCells, numProcessos_2);
+        slice_image(image, v1, vetorDeBlocos, numProcessos_1);
+        slice_image(image, v2, vetorDeBlocos, numProcessos_2);
     }
 }
