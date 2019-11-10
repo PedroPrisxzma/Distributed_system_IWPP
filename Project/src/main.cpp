@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
     // Broadcast to a node (in a ring like fashion) until all have finished
     int numeroDeProcessos, rank;
     ImageChunk imageChunk;
-    MPI_Request send_req, recive_req;
 
     // Inicia programacao distribuida
     MPI_Init(&argc, &argv);
@@ -38,12 +37,12 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        if (argc < 3)
+        if (argc < 2)
         {
             cout << " Usage: executable ImageToLoad, no ImageToLoad was provided" << endl;
             throw std::exception();
         }
-        numeroDeProcessos = atoi(argv[2]);
+        // numeroDeProcessos = atoi(argv[2]);
         Mat inputImage;
         inputImage = image_reader(argv[1]);
         cout << inputImage.size << endl;
@@ -54,18 +53,18 @@ int main(int argc, char *argv[])
         imageChunk.vetorDeVertices = imageBlocks.vetorDeVertices; 
         for(int i=1; i<numeroDeProcessos; i++)
         {
-            sizeToSend = 2;//= imageChunk.vetorDeImagens.size()*sizeof(Vertices); 
-            cout << "        Send message size: " << sizeToSend << endl; 
-            // sizeToSend += imageChunk.vetorDeImagens[0].area(); 
-            cout << "        Send message size: " << sizeToSend << endl; 
-            //cout << imageChunk.vetorDeImagens[i].size() << endl; 
             imageChunk.vetorDeImagens.push_back(imageBlocks.vetorDeImagens[i]);
+            sizeToSend = imageChunk.mySize();
+            cout << "        Send message size: " << sizeToSend << endl; 
+            cout << "        Send message size: " << imageChunk.vetorDeImagens[0].area() << endl; 
+            cout << "        Send message size: " << sizeof(imageChunk) << endl; 
+            cout << "        Send to: " << i << endl; 
+
             // Envia o tamanho dos dados
             MPI_Send(&sizeToSend, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            // MPI_Isend(&sizeToSend, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &send_req);
             // Envia os dados
-            MPI_Send(&sizeToSend, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            // MPI_Isend(&imageChunk, sizeToSend, MPI_BYTE, i, 0, MPI_COMM_WORLD, &send_req);
+            MPI_Send(&imageChunk, sizeToSend, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+
             imageChunk.vetorDeImagens.pop_back();
         }
 
@@ -76,9 +75,11 @@ int main(int argc, char *argv[])
     {
         int sizeToRecive;
         // Recebe o tamanho dos dados
-        MPI_Irecv(&sizeToRecive, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &recive_req);
+        MPI_Recv(&sizeToRecive, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            cout << rank << "        Recive message 1 " <<  endl; 
         // Recebe os dados
-        MPI_Irecv(&imageChunk, sizeToRecive, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &recive_req);
+        MPI_Recv(&imageChunk, sizeToRecive, MPI_BYTE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            cout << rank << "        Recive message 2 " << endl; 
     }
 
     // TODO: fazer algo com imageChunk 

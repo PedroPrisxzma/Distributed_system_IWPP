@@ -19,6 +19,7 @@ class ImageChunk
     vector<Rect> vetorDeImagens;
     
     ImageChunk();
+    int mySize();
 
 };
 

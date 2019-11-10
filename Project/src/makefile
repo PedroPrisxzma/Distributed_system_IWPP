@@ -14,7 +14,7 @@ INC = $(H_SRCS:%=-I/%)
 # INC = -I/classes/ -I/image_handling/ -I/morphological_algorithms/
 BINS = main 
 
-main : ${SRCS} ${INC_SRCS}
+main : ${SRC}
 	@echo "Checking.."
 	$(CC) $(CXXFLAGS) $(INC) $(SRC) $(CVFLAGS) -o main
 

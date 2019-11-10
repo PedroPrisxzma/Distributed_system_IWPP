@@ -13,12 +13,14 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
+void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos);
+
 // Read in the image
 Mat image_reader(char *filename)
 {
     
     Mat image;
-    image = imread(filename, CV_LOAD_IMAGE_COLOR);
+    image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
 
     if (!image.data) // Check for invalid input
     {
@@ -48,15 +50,15 @@ ImageChunk separate_image(Mat image, int numProcessos)
     //cout << "Image Details" << endl;
     //printf("Width: %d\nHeight: %d\n", width, height);
 
-    slice_image(image, vertice, vetorDeBlocos, numProcessos);
+    slice_image(image, vertice, &vetorDeBlocos, numProcessos);
 
-    imshow("image", image);
-    waitKey();
+    // imshow("image", image);
+    // waitKey();
 
     return vetorDeBlocos;
 }
 
-void slice_image(Mat image, Vertices vertices, ImageChunk vetorDeBlocos, int numProcessos)
+void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos)
 {
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
@@ -67,10 +69,12 @@ void slice_image(Mat image, Vertices vertices, ImageChunk vetorDeBlocos, int num
     else if (numProcessos == 1)
     {
         Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
-        vetorDeBlocos.vetorDeImagens.push_back(grid_rect);
-        vetorDeBlocos.vetorDeVertices.push_back(vertices);
+        vetorDeBlocos->vetorDeImagens.push_back(grid_rect);
+        vetorDeBlocos->vetorDeVertices.push_back(vertices);
 
         
+        // cout << vetorDeBlocos->vetorDeVertices.size()     << endl;
+        // cout << vetorDeBlocos->vetorDeImagens.size()     << endl;
         cout << grid_rect << endl;
         
         rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
