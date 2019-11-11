@@ -52,8 +52,8 @@ ImageChunk separate_image(Mat image, int numProcessos)
 
     slice_image(image, vertice, &vetorDeBlocos, numProcessos);
 
-    // imshow("image", image);
-    // waitKey();
+    imshow("image", image);
+    waitKey();
 
     return vetorDeBlocos;
 }

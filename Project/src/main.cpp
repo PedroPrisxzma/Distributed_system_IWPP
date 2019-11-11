@@ -16,13 +16,20 @@ using namespace cv;
 
 int main(int argc, char *argv[])
 {
+   // **** Testar o arquivo nscale/src/segment/test/src/imreconTest.cpp  ****
+    // Para entender a reconstrucao morfologica
+
     // Separate the image, must be flexible,
     // allowing to separate into same size or diferent sized smaller chunks
 
     // Store references to the image's corners
+    // Neighbours vector boundbox
+    // Send borders interssections 
 
+    // Allocate MPI object
     // Send the image to the available machines, to execute the IWPP
     // When hiting a corner must comunicate with it's neighbours
+
 
     //Stop condition, possibilities:
     // Either broadcast to all nodes
@@ -37,12 +44,12 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        if (argc < 2)
+        if (argc =! 2)
         {
-            cout << " Usage: executable ImageToLoad, no ImageToLoad was provided" << endl;
+            cout << " Usage: mpiexec -n <process_number> ./main <image>" << endl;
             throw std::exception();
         }
-        // numeroDeProcessos = atoi(argv[2]);
+
         Mat inputImage;
         inputImage = image_reader(argv[1]);
         cout << inputImage.size << endl;
