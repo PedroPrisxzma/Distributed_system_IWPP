@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 
     for(int i=0; i<numeroDeProcessos; i++)
         {
-            cout << vert_list[i].x = imageBlocks.vetorDeVertices[i].leftSide; 
-            vert_list[i].y = imageBlocks.vetorDeVertices[i].topSide; 
-            vert_list[i].sizex = imageBlocks.vetorDeVertices[i].sizex; 
-            vert_list[i].sizey = imageBlocks.vetorDeVertices[i].sizey; 
+            cout << vert_list[i].x << endl;
+            cout << vert_list[i].y << endl;
+            cout << vert_list[i].sizex << endl; 
+            cout << vert_list[i].sizey << endl; 
         }
     // TODO: fazer algo com imageChunk 
 
