@@ -7,6 +7,7 @@ class Vertices
     int leftSide, rightSide, sizex, topSide, botSide, sizey;
 
     Vertices(int,int,int,int);
+    int mySize();
 };
 
 #endif

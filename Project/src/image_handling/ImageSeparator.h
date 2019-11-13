@@ -8,6 +8,5 @@ using namespace cv;
 
 ImageChunk separate_image(Mat image, int numProcessos);
 Mat image_reader(char *filename);
-void slice_image(Mat image, Vertices vertices, ImageChunk vetorDeBlocos, int numProcessos);
 
 #endif

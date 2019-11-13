@@ -12,4 +12,10 @@ Vertices::Vertices(int left, int right, int top, int bot)
     topSide = top;
     botSide = bot;
     sizey = bot-top;
+
 } 
+
+int Vertices::mySize()
+{
+    return 6 * sizeof(int);
+}
