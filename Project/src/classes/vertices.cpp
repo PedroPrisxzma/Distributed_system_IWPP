@@ -4,14 +4,14 @@ using namespace std;
 
 #include "vertices.h"
 
-Vertices::Vertices(int left, int right, int top, int bot)
+Vertices::Vertices(int coordX, int coordX2, int coordY, int coordY2)
 {
-    leftSide = left;
-    rightSide = right;
-    sizex = right-left;
-    topSide = top;
-    botSide = bot;
-    sizey = bot-top;
+    coordinateX = coordX;
+    coordinateX2 = coordX2;
+    edgeX = coordX2-coordX;
+    coordinateY = coordY;
+    coordinateY2 = coordY2;
+    edgeY = coordY2-coordY;
 
 } 
 

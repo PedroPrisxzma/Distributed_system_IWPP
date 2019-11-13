@@ -11,13 +11,15 @@ using namespace cv;
 
 #include "morphological_algorithms/MorphologicOperations.h"
 #include "image_handling/ImageSeparator.h"
+#include "image_handling/SendReceiveImage.h"
 #include "classes/imageChunk.h"
 #include "classes/vertices.h"
 
 typedef struct boundBox
 {
-    int x, y, sizex, sizey;
+    int coordinateX, coordinateY, edgeX, edgeY;
 } BoundBox; 
+
 
 int main(int argc, char *argv[])
 {
@@ -39,6 +41,7 @@ int main(int argc, char *argv[])
     //Stop condition, possibilities:
     // Either broadcast to all nodes
     // Broadcast to a node (in a ring like fashion) until all have finished
+    
     int numeroDeProcessos, rank;
     // ImageChunk imageChunk;
     Mat imgblock;
@@ -65,43 +68,41 @@ int main(int argc, char *argv[])
 
         for(int i=0; i<numeroDeProcessos; i++)
         {
-            vert_list[i].x = imageBlocks.vetorDeVertices[i].leftSide; 
-            vert_list[i].y = imageBlocks.vetorDeVertices[i].topSide; 
-            vert_list[i].sizex = imageBlocks.vetorDeVertices[i].sizex; 
-            vert_list[i].sizey = imageBlocks.vetorDeVertices[i].sizey; 
+            vert_list[i].coordinateX = imageBlocks.vetorDeVertices[i].coordinateX; 
+            vert_list[i].coordinateY = imageBlocks.vetorDeVertices[i].coordinateY; 
+            vert_list[i].edgeX = imageBlocks.vetorDeVertices[i].edgeX; 
+            vert_list[i].edgeY = imageBlocks.vetorDeVertices[i].edgeY; 
         }
 
         for(int i=1; i<numeroDeProcessos; i++)
         {
-            // Envia o tamanho dos dados
+            // Envia o vetor de boundBoxes
             MPI_Send(&vert_list, 4*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
 
-            // Envia os dados
-            Mat slice = Mat(imageBlocks.vetorDeImagens[i]).clone();
-
-            MPI_Send(slice.data, vert_list[i].sizex*vert_list[i].sizey, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+            //// Envia as imagens
+            matsnd(imageBlocks.vetorDeImagens[i], i);
         }
 
         imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
     }
     else
     {
-        // Recebe o tamanho dos dados
+        // Recebe o vetor de boundBoxes
         MPI_Recv(&vert_list, 4*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        // Recebe os dados
-        imgblock = Mat(vert_list[rank].sizex, vert_list[rank].sizey, CV_8UC3);
-
-        MPI_Recv(imgblock.data, vert_list[rank].sizex*vert_list[rank].sizey, MPI_BYTE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Recebe as imagens
+        imgblock = matrcv(0);
     }
 
-    for(int i=0; i<numeroDeProcessos; i++)
-        {
-            cout << vert_list[i].x << endl;
-            cout << vert_list[i].y << endl;
-            cout << vert_list[i].sizex << endl; 
-            cout << vert_list[i].sizey << endl; 
-        }
+    cout << "rank" << rank << "  " 
+     << vert_list[rank].coordinateX << "  " 
+     << vert_list[rank].coordinateY << "  " 
+     << vert_list[rank].edgeX << "  "   
+     << vert_list[rank].edgeY << endl; 
+
+    imshow("image", imgblock);
+    waitKey();
+
     // TODO: fazer algo com imageChunk 
 
     //cout << imageChunk.vetorDeVertices << endl << imageChunk.vetorDeImagens << endl;
@@ -111,3 +112,8 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
 }
+
+
+// Perguntar:
+    // Ao separar os blocos da imagem, devem ser referencias ou copias?
+    // Ao terminar, devo juntar os blocos processados numa imagem?

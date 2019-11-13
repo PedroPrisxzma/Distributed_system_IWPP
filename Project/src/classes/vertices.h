@@ -4,7 +4,7 @@
 class Vertices
 {
     public:
-    int leftSide, rightSide, sizex, topSide, botSide, sizey;
+    int coordinateX, coordinateX2, edgeX, coordinateY, coordinateY2, edgeY;
 
     Vertices(int,int,int,int);
     int mySize();

@@ -13,25 +13,25 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
-void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos);
 
 // Read in the image
 Mat image_reader(char *filename)
 {
     
     Mat image;
-    image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+    image = imread(filename, IMREAD_COLOR);
+    // image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
 
     if (!image.data) // Check for invalid input
     {
-        //cout << "Could not open or find the image" << std::endl;
+        cout << "Could not open or find the image" << std::endl;
         throw std::exception();
     }
 
     //namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
     //imshow("Display window", image);                // Show our image inside it.
 
-    waitKey(0);
+    //waitKey(0);
 
     return image;
 }
@@ -52,8 +52,8 @@ ImageChunk separate_image(Mat image, int numProcessos)
 
     slice_image(image, vertice, &vetorDeBlocos, numProcessos);
 
-    imshow("image", image);
-    waitKey();
+    // imshow("image", image);
+    // waitKey();
 
     return vetorDeBlocos;
 }
@@ -64,23 +64,23 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
     int factor, numProcessos_1, numProcessos_2;
 
-    if (numProcessos == 0 || vertices.sizex == 0 || vertices.sizey == 0 )
+    if (numProcessos == 0 || vertices.edgeX == 0 || vertices.edgeY == 0 )
         return;
     else if (numProcessos == 1)
     {
-        Mat img_slice = image(Rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey));
+        Mat img_slice = image(Rect(vertices.coordinateX, vertices.coordinateY, vertices.edgeX, vertices.edgeY));
         vetorDeBlocos->vetorDeImagens.push_back(img_slice);
         vetorDeBlocos->vetorDeVertices.push_back(vertices);
 
         
-        Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
+        Rect grid_rect(vertices.coordinateX, vertices.coordinateY, vertices.edgeX, vertices.edgeY);
         // cout << vetorDeBlocos->vetorDeVertices.size()     << endl;
         // cout << vetorDeBlocos->vetorDeImagens.size()     << endl;
         cout << grid_rect << endl;
         
-        rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
+        // rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
         // imshow("image", image);
-        // imshow(format("grid(%d,%d)-(%d,%d)", vertices.leftSide,vertices.topSide, vertices.rightSide, vertices.botSide), image(grid_rect));
+        // imshow(format("grid(%d,%d)-(%d,%d)", vertices.coordinateX,vertices.coordinateY, vertices.rightSide, vertices.coordinateY2), image(grid_rect));
         // waitKey();
         
         return;
@@ -102,25 +102,25 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
         //cout <<"..numProcessos_1: "<< numProcessos_1 << endl;
         //cout <<"..numProcessos_2: "<< numProcessos_2 << endl;
 
-    if (vertices.sizex < vertices.sizey)
+    if (vertices.edgeX < vertices.edgeY)
     {
         //cout << "valor de divisao:" << factor << endl
-             //<< "TamanhoY " << vertices.sizey << endl;
+             //<< "TamanhoY " << vertices.edgeY << endl;
 
-        int horizontal_cut = vertices.sizey / factor;
-        Vertices v1(vertices.leftSide, vertices.rightSide, vertices.topSide, vertices.topSide + horizontal_cut);
-        Vertices v2(vertices.leftSide, vertices.rightSide, vertices.topSide + horizontal_cut, vertices.botSide);
+        int horizontal_cut = vertices.edgeY / factor;
+        Vertices v1(vertices.coordinateX, vertices.coordinateX2, vertices.coordinateY, vertices.coordinateY + horizontal_cut);
+        Vertices v2(vertices.coordinateX, vertices.coordinateX2, vertices.coordinateY + horizontal_cut, vertices.coordinateY2);
         slice_image(image, v1, vetorDeBlocos, numProcessos_1);
         slice_image(image, v2, vetorDeBlocos, numProcessos_2);
     }
     else
     {
         //cout << "valor de divisao:" << factor << endl
-             //<< "TamanhoX " << vertices.sizex << endl;
+             //<< "TamanhoX " << vertices.edgeX << endl;
 
-        int vertical_cut = vertices.sizex / (factor);
-        Vertices v1(vertices.leftSide, vertices.leftSide + vertical_cut, vertices.topSide, vertices.botSide);
-        Vertices v2(vertices.leftSide + vertical_cut, vertices.rightSide, vertices.topSide, vertices.botSide);
+        int vertical_cut = vertices.edgeX / (factor);
+        Vertices v1(vertices.coordinateX, vertices.coordinateX + vertical_cut, vertices.coordinateY, vertices.coordinateY2);
+        Vertices v2(vertices.coordinateX + vertical_cut, vertices.coordinateX2, vertices.coordinateY, vertices.coordinateY2);
         slice_image(image, v1, vetorDeBlocos, numProcessos_1);
         slice_image(image, v2, vetorDeBlocos, numProcessos_2);
     }
