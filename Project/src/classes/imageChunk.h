@@ -16,7 +16,7 @@ class ImageChunk
     vector<Vertices> vetorDeVertices;
 
     public:
-    vector<Rect> vetorDeImagens;
+    vector<Mat> vetorDeImagens;
     
     ImageChunk();
     int mySize();

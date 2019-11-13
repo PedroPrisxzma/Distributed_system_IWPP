@@ -15,7 +15,7 @@ int ImageChunk::mySize()
 {
     int vVertices = vetorDeVertices.size() * vetorDeVertices[0].mySize();
 
-    int vImages = vetorDeImagens[0].area(); 
+    int vImages = vetorDeImagens[0].rows*vetorDeImagens[0].cols ; 
 
     return vVertices + vImages;
 } 

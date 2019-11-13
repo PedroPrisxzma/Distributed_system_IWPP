@@ -68,11 +68,12 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
         return;
     else if (numProcessos == 1)
     {
-        Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
-        vetorDeBlocos->vetorDeImagens.push_back(grid_rect);
+        Mat img_slice = image(Rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey));
+        vetorDeBlocos->vetorDeImagens.push_back(img_slice);
         vetorDeBlocos->vetorDeVertices.push_back(vertices);
 
         
+        Rect grid_rect(vertices.leftSide, vertices.topSide, vertices.sizex, vertices.sizey);
         // cout << vetorDeBlocos->vetorDeVertices.size()     << endl;
         // cout << vetorDeBlocos->vetorDeImagens.size()     << endl;
         cout << grid_rect << endl;
