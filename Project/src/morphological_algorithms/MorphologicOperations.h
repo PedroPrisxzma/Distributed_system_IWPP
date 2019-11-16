@@ -1,5 +1,6 @@
 #ifndef __MORPHOLOGIC__
 #define __MORPHOLOGIC__
+#define DllExport //nothing 
 
 #include <opencv2/opencv.hpp>
 // #include <opencv/cv.hpp>

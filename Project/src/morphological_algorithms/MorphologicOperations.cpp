@@ -9,6 +9,7 @@ using namespace std;
 #include "MorphologicOperations.h"
 using namespace cv;
 
+namespace nscale{
 
 template <typename T>
 inline void propagate(const Mat& image, Mat& output, std::queue<int>& xQ, std::queue<int>& yQ,
@@ -195,5 +196,13 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 //	std::cout <<  count << " queue entries "<< std::endl;
 
 	return output(Range(1, maxy), Range(1, maxx));
+
+}
+
+
+//template Mat imreconstructGeorge<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<unsigned short int>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<float>(const Mat& seeds, const Mat& image, int connectivity);
 
 }
