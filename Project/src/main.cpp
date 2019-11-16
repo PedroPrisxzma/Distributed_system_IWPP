@@ -12,9 +12,9 @@ using namespace cv;
 #include "morphological_algorithms/MorphologicOperations.h"
 #include "image_handling/ImageSeparator.h"
 #include "image_handling/SendReceiveImage.h"
+#include "image_handling/FindNeighbour.h"
 #include "classes/imageChunk.h"
 #include "classes/vertices.h"
-#include "image_handling/FindNeighbour.h"
 
 int main(int argc, char *argv[])
 {
@@ -73,8 +73,23 @@ int main(int argc, char *argv[])
             vert_list[i].rank = i; 
         }
 
-        BoundBox **vizinhos; // Lista de listas       
-        vizinhos = FindNeighbours(vert_list, numeroDeProcessos);
+        // Acha vizinhos dos Chunks de imagens
+        ::std::vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas       
+        vizinhos = FindNeighbours(vert_list, numeroDeProcessos, 4);
+        cout << "---------------------------------" << endl;
+        for(int i = 0; i < numeroDeProcessos; i++)
+        {
+            cout << "Vizinhos de: " << i << endl;
+            cout << "I -> cX: "  << vert_list[i].coordinateX << " cY: " << vert_list[i].coordinateY << " eX: " << vert_list[i].edgeX << " eY: " << vert_list[i].edgeY<< endl;
+            cout << " --------------------------- " << endl;
+            for(int j = 0; j < vizinhos[i].size(); j++)
+            {
+                cout << "J -> cX: "  << vizinhos[i][j].coordinateX << " cY: " << vizinhos[i][j].coordinateY << " eX: " << vizinhos[i][j].edgeX << " eY: " << vizinhos[i][j].edgeY<< endl;
+                cout << endl;
+            }
+        }
+
+
         for(int i=1; i<numeroDeProcessos; i++)
         {   
             // Envia o vetor de boundBoxes

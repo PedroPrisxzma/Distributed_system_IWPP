@@ -11,52 +11,98 @@ using namespace cv;
 #include "FindNeighbour.h"
 
 
-BoundBox** FindNeighbours(BoundBox* lista, int size, int connectivity)
+vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int connectivity)
 {
     int i,j;
-    bool intercect;
-    vector<int> vizinos;
+    
+    // Aloca lista externa de listas de imagens
+    ::std::vector<vector<BoundBox>> vizinhos(size);
+        
     for(i=0;i<size;i++)
     {   
-        int x_left_up_i = lista[i].coordinateX;
-        int x_left_bot_i = lista[i].coordinateX + list[i].edgeY;
-        int x_right_up_i = lista[i].coordinateX + list[i].edgeX;
-        
-        int y_left_up_i = lista[i].coordinateY;
-        int y_left_bot_i = lista[i].coordinateY + list[i].edgeY;
-        int y_right_up_i = lista[i].coordinateY + list[i].edgeX;
-       
+        vizinhos[i] = vector<BoundBox>(0);
 
-        // cout << " --------------------------- " << endl;
-        // cout << "I -> cX:    "  << lista[i].coordinateX << " cY: " << lista[i].coordinateY << " eX: " << lista[i].edgeX << " eY: " << lista[i].edgeY<< endl;
-        // cout << " --------------------------- " << endl;
+        cout << "PING!!! " << endl;
+        int x_left_i = listaDeImagens[i].coordinateX;
+        int x_right_i = listaDeImagens[i].coordinateX + listaDeImagens[j].edgeX;
+        cout << "PONG??? " << endl;
+
+        int y_up_i = listaDeImagens[i].coordinateY;
+        int y_bot_i = listaDeImagens[i].coordinateY + listaDeImagens[i].edgeY;      
+
+        cout << " --------------------------- " << endl;
+        cout << "I -> cX:    "  << listaDeImagens[i].coordinateX << " cY: " << listaDeImagens[i].coordinateY << " eX: " << listaDeImagens[i].edgeX << " eY: " << listaDeImagens[i].edgeY<< endl;
+        cout << " --------------------------- " << endl;
         for(j=0;j<size;j++)
         {
-            int x_left_up_j = lista[j].coordinateY
-            int x_left_bot_j = lista[j].coordinateX;
-            int x_right_up_j = lista[j].coordinateX + lista[j].edgeX;
+            int numOfNeighbours = 0;
+            int x_left_j = listaDeImagens[j].coordinateX;
+            int x_right_j = listaDeImagens[j].coordinateX + listaDeImagens[j].edgeX;
             
-            int y_right_up_j = lista[j].coordinateY;
-            int y_left_up_j = lista[j].coordinateY;
-            int y_right_bot_j = lista[j].coordinateY + lista[i].edgeY;            
+            int y_up_j = listaDeImagens[j].coordinateY;
+            int y_bot_j = listaDeImagens[j].coordinateY + listaDeImagens[i].edgeY;            
+
+            
 
             if(i==j) continue;
 
-            // cout << "J -> cX: "  << lista[j].coordinateX << " cY: " << lista[j].coordinateY << " eX: " << lista[j].edgeX << " eY: " << lista[j].edgeY<< endl;
-            // cout << endl;
 
             // Check left neighbour
-            if(CheckIfNeighbour())
+            if(CheckIfNeighbour(x_left_i, x_left_i, x_right_j, x_right_j) &&
+               CheckIfNeighbour(y_up_i, y_bot_i, y_up_j, y_bot_j) )
             {
-
+                cout << "Left neighbour"  << endl;
+                cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
+                cout << endl;
+                numOfNeighbours++;
+                vizinhos[i].resize(numOfNeighbours);
+                vizinhos[i][j] = listaDeImagens[j];
+                // Add neighbour
             }
-        
+
+            // Check up neighbour
+            if(CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
+               CheckIfNeighbour(y_up_i, y_up_i, y_bot_j, y_bot_j) )
+            {
+                cout << "Up neighbour"  << endl;
+                cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
+                cout << endl;
+                numOfNeighbours++;
+                vizinhos[i].resize(numOfNeighbours);
+                vizinhos[i][j] = listaDeImagens[j];
+                // Add neighbour
+            }
+            
+            // Check right neighbour
+            if(CheckIfNeighbour(x_right_i, x_right_i, x_left_j, x_left_j) &&
+               CheckIfNeighbour(y_up_i, y_bot_i, y_up_j, y_bot_j) )
+            {
+                cout << "Right neighbour"  << endl;
+                cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
+                cout << endl;
+                numOfNeighbours++;
+                vizinhos[i].resize(numOfNeighbours);
+                vizinhos[i][j] = listaDeImagens[j];
+                // Add neighbour
+            }
+
+            // Check bot neighbour
+            if(CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
+               CheckIfNeighbour(y_bot_i, y_bot_i, y_up_j, y_up_j) )
+            {
+                cout << "bot neighbour"  << endl;
+                cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
+                cout << endl;
+                numOfNeighbours++;
+                vizinhos[i].resize(numOfNeighbours);
+                vizinhos[i][j] = listaDeImagens[j];
+                // Add neighbour
+            }
         }
 
     }
 
-    BoundBox** test;
-    return test;
+    return vizinhos;
 }
                            //x1                 x2                      xa                       xb
 bool CheckIfNeighbour( int chunkCoordinate, int chunkCoordinateEnd, int neighbourCoordinate, int neighbourCoordinateEnd)
@@ -74,12 +120,3 @@ bool CheckIfNeighbour( int chunkCoordinate, int chunkCoordinateEnd, int neighbou
     if(neighbourCoordinate<=chunkCoordinateEnd && neighbourCoordinateEnd>=chunkCoordinateEnd) return true;
     return false;
 }
-
-
-
-X
-a------------------b
-|                  |
-|                  |
-|                  |
-c------------------d

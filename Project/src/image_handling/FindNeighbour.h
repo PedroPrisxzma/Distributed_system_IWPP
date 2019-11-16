@@ -9,5 +9,7 @@ typedef struct boundBox
 } BoundBox; 
 
 
-BoundBox** FindNeighbours(BoundBox*, int);
+vector<vector<BoundBox>> FindNeighbours(BoundBox* lista, int size, int connectivity);
+bool CheckIfNeighbour( int chunkCoordinate, int chunkCoordinateEnd, int neighbourCoordinate, int neighbourCoordinateEnd);
+
 #endif
