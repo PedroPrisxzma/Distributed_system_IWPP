@@ -19,8 +19,8 @@ Mat image_reader(char *filename)
 {
     
     Mat image;
-    image = imread(filename, IMREAD_COLOR);
-    // image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+    // image = imread(filename, IMREAD_COLOR);
+    image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
 
     if (!image.data) // Check for invalid input
     {
