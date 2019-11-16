@@ -117,3 +117,5 @@ int main(int argc, char *argv[])
 // Perguntar:
     // Ao separar os blocos da imagem, devem ser referencias ou copias?
     // Ao terminar, devo juntar os blocos processados numa imagem?
+
+    // ---> tem que ser cópia, referencia não funciona. Ao terminar, tem que juntar de volta a imagem.
