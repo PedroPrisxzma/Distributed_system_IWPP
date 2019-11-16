@@ -6,9 +6,9 @@ using namespace cv;
 #include "../classes/vertices.h"
 #include "../classes/imageChunk.h"
 
-ImageChunk separate_image(Mat image, int numProcessos);
+ImageChunk separate_image(Mat image, Mat mask, int numProcessos);
 Mat image_reader(char *filename);
-void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos);
+void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos);
 
 
 #endif

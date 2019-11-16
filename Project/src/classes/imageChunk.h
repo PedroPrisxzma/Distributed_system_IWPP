@@ -17,7 +17,9 @@ class ImageChunk
 
     public:
     vector<Mat> vetorDeImagens;
-    
+    public:
+    vector<Mat> vetorDeMascaras;
+
     ImageChunk();
     int mySize();
 

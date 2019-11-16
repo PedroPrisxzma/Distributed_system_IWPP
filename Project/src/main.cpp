@@ -14,12 +14,7 @@ using namespace cv;
 #include "image_handling/SendReceiveImage.h"
 #include "classes/imageChunk.h"
 #include "classes/vertices.h"
-
-typedef struct boundBox
-{
-    int coordinateX, coordinateY, edgeX, edgeY;
-} BoundBox; 
-
+#include "image_handling/FindNeighbour.h"
 
 int main(int argc, char *argv[])
 {
@@ -41,10 +36,11 @@ int main(int argc, char *argv[])
     //Stop condition, possibilities:
     // Either broadcast to all nodes
     // Broadcast to a node (in a ring like fashion) until all have finished
-    
+        
     int numeroDeProcessos, rank;
     // ImageChunk imageChunk;
     Mat imgblock;
+    Mat mskblock;
 
     // Inicia programacao distribuida
     MPI_Init(&argc, &argv);
@@ -52,19 +48,21 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     BoundBox vert_list[numeroDeProcessos];
 
+
+
     if (rank == 0)
     {
-        if (argc < 2)
+        if (argc < 3)
         {
-            cout << " Usage: mpiexec -n <process_number> ./main <image>" << endl;
+            cout << " Usage: mpiexec -n <process_number> ./main <marker> <mask>" << endl;
             throw std::exception();
         }
 
-        Mat inputImage;
-        inputImage = image_reader(argv[1]);
+        Mat inputImage = image_reader(argv[1]);
+        Mat inputMask = image_reader(argv[2]);
         cout << inputImage.size << endl;
 
-        ImageChunk imageBlocks = separate_image(inputImage, numeroDeProcessos);
+        ImageChunk imageBlocks = separate_image(inputImage, inputMask, numeroDeProcessos);
 
         for(int i=0; i<numeroDeProcessos; i++)
         {
@@ -72,27 +70,35 @@ int main(int argc, char *argv[])
             vert_list[i].coordinateY = imageBlocks.vetorDeVertices[i].coordinateY; 
             vert_list[i].edgeX = imageBlocks.vetorDeVertices[i].edgeX; 
             vert_list[i].edgeY = imageBlocks.vetorDeVertices[i].edgeY; 
+            vert_list[i].rank = i; 
         }
 
+        BoundBox **vizinhos; // Lista de listas       
+        vizinhos = FindNeighbours(vert_list, numeroDeProcessos);
         for(int i=1; i<numeroDeProcessos; i++)
-        {
+        {   
             // Envia o vetor de boundBoxes
-            MPI_Send(&vert_list, 4*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&vert_list, 5*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
 
             //// Envia as imagens
             matsnd(imageBlocks.vetorDeImagens[i], i);
+            matsnd(imageBlocks.vetorDeMascaras[i], i);
         }
 
         imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
+        mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
     }
     else
     {
         // Recebe o vetor de boundBoxes
-        MPI_Recv(&vert_list, 4*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&vert_list, 5*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         // Recebe as imagens
         imgblock = matrcv(0);
+        mskblock = matrcv(0);
     }
+    
+    return 0;
 
     cout << "rank" << rank << "  " 
      << vert_list[rank].coordinateX << "  " 
@@ -100,14 +106,19 @@ int main(int argc, char *argv[])
      << vert_list[rank].edgeX << "  "   
      << vert_list[rank].edgeY << endl; 
 
-    imshow("image", imgblock);
-    waitKey();
-
-    // TODO: fazer algo com imageChunk 
-
+    // imshow("image", imgblock);
+    // waitKey();
+    // imshow("image", mskblock);
+    // waitKey();
+        
     //cout << imageChunk.vetorDeVertices << endl << imageChunk.vetorDeImagens << endl;
-    
+        
 
+    //////////////////////////////////////////////////////////////////////////////////////
+	// Morphological alg
+    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4);
+    imshow("image", recon);
+    waitKey();
     // Finaliza programacao distribuida
     MPI_Finalize();
     return 0;

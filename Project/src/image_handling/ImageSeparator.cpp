@@ -37,7 +37,7 @@ Mat image_reader(char *filename)
 }
 
 // Separate the image into smaller chunks
-ImageChunk separate_image(Mat image, int numProcessos)
+ImageChunk separate_image(Mat image, Mat mask, int numProcessos)
 {
     int width = image.cols;
     int height = image.rows;
@@ -50,7 +50,7 @@ ImageChunk separate_image(Mat image, int numProcessos)
     //cout << "Image Details" << endl;
     //printf("Width: %d\nHeight: %d\n", width, height);
 
-    slice_image(image, vertice, &vetorDeBlocos, numProcessos);
+    slice_image(image, mask, vertice, &vetorDeBlocos, numProcessos);
 
     // imshow("image", image);
     // waitKey();
@@ -58,7 +58,7 @@ ImageChunk separate_image(Mat image, int numProcessos)
     return vetorDeBlocos;
 }
 
-void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos)
+void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos)
 {
     //TODO:
     // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
@@ -70,6 +70,10 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
     {
         Mat img_slice = image(Rect(vertices.coordinateX, vertices.coordinateY, vertices.edgeX, vertices.edgeY));
         vetorDeBlocos->vetorDeImagens.push_back(img_slice);
+  
+        Mat msk_slice = mask(Rect(vertices.coordinateX, vertices.coordinateY, vertices.edgeX, vertices.edgeY));
+        vetorDeBlocos->vetorDeMascaras.push_back(msk_slice);
+  
         vetorDeBlocos->vetorDeVertices.push_back(vertices);
 
         
@@ -110,8 +114,8 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
         int horizontal_cut = vertices.edgeY / factor;
         Vertices v1(vertices.coordinateX, vertices.coordinateX2, vertices.coordinateY, vertices.coordinateY + horizontal_cut);
         Vertices v2(vertices.coordinateX, vertices.coordinateX2, vertices.coordinateY + horizontal_cut, vertices.coordinateY2);
-        slice_image(image, v1, vetorDeBlocos, numProcessos_1);
-        slice_image(image, v2, vetorDeBlocos, numProcessos_2);
+        slice_image(image, mask, v1, vetorDeBlocos, numProcessos_1);
+        slice_image(image, mask, v2, vetorDeBlocos, numProcessos_2);
     }
     else
     {
@@ -121,7 +125,7 @@ void slice_image(Mat image, Vertices vertices, ImageChunk *vetorDeBlocos, int nu
         int vertical_cut = vertices.edgeX / (factor);
         Vertices v1(vertices.coordinateX, vertices.coordinateX + vertical_cut, vertices.coordinateY, vertices.coordinateY2);
         Vertices v2(vertices.coordinateX + vertical_cut, vertices.coordinateX2, vertices.coordinateY, vertices.coordinateY2);
-        slice_image(image, v1, vetorDeBlocos, numProcessos_1);
-        slice_image(image, v2, vetorDeBlocos, numProcessos_2);
+        slice_image(image, mask, v1, vetorDeBlocos, numProcessos_1);
+        slice_image(image, mask, v2, vetorDeBlocos, numProcessos_2);
     }
 }

@@ -125,13 +125,19 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	}
 
 //	uint64_t t2 = cci::common::event::timestampInUS();
-//	std::cout << "    scan time = " << t2-t1 << "ms for " << count << " queue entries."<< std::endl;
+//	std::cout << "	scan time = " << t2-t1 << "ms for " << count << " queue entries."<< std::endl;
 
 	// now process the queue.
 //	T qval, ival;
 	int x, y;
 	count = 0;
-	while (!(xQ.empty())) {
+	while (1) {
+		if (xQ.empty())
+		{
+			// MPI_Recv(&vert_list, 4*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+		}
+
 		++count;
 		x = xQ.front();
 		y = yQ.front();
@@ -191,7 +197,7 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 
 
 //	uint64_t t3 = cci::common::event::timestampInUS();
-//	std::cout << "    queue time = " << t3-t2 << "ms for " << count << " queue entries "<< std::endl;
+//	std::cout << "	queue time = " << t3-t2 << "ms for " << count << " queue entries "<< std::endl;
 
 //	std::cout <<  count << " queue entries "<< std::endl;
 

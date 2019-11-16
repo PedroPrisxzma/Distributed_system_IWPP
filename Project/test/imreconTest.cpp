@@ -14,8 +14,7 @@
 #include <vector>
 #include <errno.h>
 #include <time.h>
-#include "MorphologicOperations.h"
-#include "MorphologicOperations.h"
+#include "../src/morphological_algorithms/MorphologicOperations.h"
 // #include "Logger.h"
 #include <stdio.h>
 

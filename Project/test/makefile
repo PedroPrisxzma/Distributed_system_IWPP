@@ -17,7 +17,7 @@ BINS = imreconTest
 
 main : ${SRC}
 	@echo "Checking.."
-	$(CC) $(CXXFLAGS) $(INC) $(SRC) $(CVFLAGS) -o main
+	$(CC) $(CXXFLAGS) $(INC) $(SRC) $(CVFLAGS) -o imreconTest
 
 # $(CC) $(CXXFLAGS) $(INC) $(SRCS) $(INC_SRCS) $(CVFLAGS) -o main
 
