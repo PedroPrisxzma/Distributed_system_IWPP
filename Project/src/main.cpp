@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     // Broadcast to a node (in a ring like fashion) until all have finished
         
     int numeroDeProcessos, rank;
+    int data_size;
     // ImageChunk imageChunk;
     Mat imgblock;
     Mat mskblock;
@@ -46,8 +47,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numeroDeProcessos);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    BoundBox vert_list[numeroDeProcessos];
-
+    BoundBox* vert_list;
 
 
     if (rank == 0)
@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 
         ImageChunk imageBlocks = separate_image(inputImage, inputMask, numeroDeProcessos);
 
+        vert_list = (BoundBox*)malloc(numeroDeProcessos*sizeof(BoundBox));
         for(int i=0; i<numeroDeProcessos; i++)
         {
             vert_list[i].coordinateX = imageBlocks.vetorDeVertices[i].coordinateX; 
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
         {
             cout << "Vizinhos de: " << i << endl;
             cout << "I -> cX: "  << vert_list[i].coordinateX << " cY: " << vert_list[i].coordinateY << " eX: " << vert_list[i].edgeX << " eY: " << vert_list[i].edgeY<< endl;
-            cout << " --------------------------- " << endl;
+            cout << " --------------------------- " << vizinhos[i].size() << endl;
             for(int j = 0; j < vizinhos[i].size(); j++)
             {
                 cout << "J -> cX: "  << vizinhos[i][j].coordinateX << " cY: " << vizinhos[i][j].coordinateY << " eX: " << vizinhos[i][j].edgeX << " eY: " << vizinhos[i][j].edgeY<< endl;
@@ -89,32 +90,35 @@ int main(int argc, char *argv[])
             }
         }
 
-
         for(int i=1; i<numeroDeProcessos; i++)
         {   
             // Envia o vetor de boundBoxes
-            MPI_Send(&vert_list, 5*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
+            // MPI_Send(&vert_list, 5*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
+            data_size = 5*vizinhos[i].size();
+            MPI_Send(&data_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(vizinhos[i].data(), data_size, MPI_INT, i, 0, MPI_COMM_WORLD);
 
             //// Envia as imagens
             matsnd(imageBlocks.vetorDeImagens[i], i);
             matsnd(imageBlocks.vetorDeMascaras[i], i);
         }
 
+        free(vert_list);
+        vert_list = vizinhos[0].data();
         imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
         mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
     }
     else
     {
         // Recebe o vetor de boundBoxes
-        MPI_Recv(&vert_list, 5*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&data_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&vert_list, data_size, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         // Recebe as imagens
         imgblock = matrcv(0);
         mskblock = matrcv(0);
     }
     
-    return 0;
-
     cout << "rank" << rank << "  " 
      << vert_list[rank].coordinateX << "  " 
      << vert_list[rank].coordinateY << "  " 

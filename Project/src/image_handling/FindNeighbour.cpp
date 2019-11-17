@@ -24,7 +24,7 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
 
         cout << "PING!!! " << endl;
         int x_left_i = listaDeImagens[i].coordinateX;
-        int x_right_i = listaDeImagens[i].coordinateX + listaDeImagens[j].edgeX;
+        int x_right_i = listaDeImagens[i].coordinateX + listaDeImagens[i].edgeX;
         cout << "PONG??? " << endl;
 
         int y_up_i = listaDeImagens[i].coordinateY;
@@ -35,16 +35,16 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
         cout << " --------------------------- " << endl;
         for(j=0;j<size;j++)
         {
+            if(i==j) continue;
+
             int numOfNeighbours = 0;
             int x_left_j = listaDeImagens[j].coordinateX;
             int x_right_j = listaDeImagens[j].coordinateX + listaDeImagens[j].edgeX;
             
             int y_up_j = listaDeImagens[j].coordinateY;
-            int y_bot_j = listaDeImagens[j].coordinateY + listaDeImagens[i].edgeY;            
+            int y_bot_j = listaDeImagens[j].coordinateY + listaDeImagens[j].edgeY;            
 
             
-
-            if(i==j) continue;
 
 
             // Check left neighbour
@@ -55,8 +55,9 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
                 cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
                 cout << endl;
                 numOfNeighbours++;
-                vizinhos[i].resize(numOfNeighbours);
-                vizinhos[i][j] = listaDeImagens[j];
+                // vizinhos[i].resize(numOfNeighbours);
+                // vizinhos[i][j] = listaDeImagens[j];
+                vizinhos[i].push_back(listaDeImagens[j]);
                 // Add neighbour
             }
 
@@ -68,8 +69,9 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
                 cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
                 cout << endl;
                 numOfNeighbours++;
-                vizinhos[i].resize(numOfNeighbours);
-                vizinhos[i][j] = listaDeImagens[j];
+                // vizinhos[i].resize(numOfNeighbours);
+                // vizinhos[i][j] = listaDeImagens[j];
+                vizinhos[i].push_back(listaDeImagens[j]);
                 // Add neighbour
             }
             
@@ -81,8 +83,9 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
                 cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
                 cout << endl;
                 numOfNeighbours++;
-                vizinhos[i].resize(numOfNeighbours);
-                vizinhos[i][j] = listaDeImagens[j];
+                // vizinhos[i].resize(numOfNeighbours);
+                // vizinhos[i][j] = listaDeImagens[j];
+                vizinhos[i].push_back(listaDeImagens[j]);
                 // Add neighbour
             }
 
@@ -94,8 +97,9 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
                 cout << "J -> cX: "  << listaDeImagens[j].coordinateX << " cY: " << listaDeImagens[j].coordinateY << " eX: " << listaDeImagens[j].edgeX << " eY: " << listaDeImagens[j].edgeY<< endl;
                 cout << endl;
                 numOfNeighbours++;
-                vizinhos[i].resize(numOfNeighbours);
-                vizinhos[i][j] = listaDeImagens[j];
+                // vizinhos[i].resize(numOfNeighbours);
+                // vizinhos[i][j] = listaDeImagens[j];
+                vizinhos[i].push_back(listaDeImagens[j]);
                 // Add neighbour
             }
         }

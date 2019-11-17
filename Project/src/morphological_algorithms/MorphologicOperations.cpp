@@ -134,8 +134,8 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	while (1) {
 		if (xQ.empty())
 		{
-			// MPI_Recv(&vert_list, 4*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
+			// MPI_Recv(&vert_list, 5*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			break;
 		}
 
 		++count;
