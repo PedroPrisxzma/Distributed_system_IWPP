@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include <iostream>
+#include <queue>
 using namespace std;
 
 #include <omp.h>
@@ -48,7 +49,8 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &numeroDeProcessos);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     BoundBox* vert_list;
-    std::vector<BoundBox> rankNeighbours;
+    vector<BoundBox> rankNeighbours;
+    vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas       
 
 
     if (rank == 0)
@@ -77,7 +79,6 @@ int main(int argc, char *argv[])
         }
 
         // Acha vizinhos dos Chunks de imagens
-        ::std::vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas       
         vizinhos = FindNeighbours(vert_list, numeroDeProcessos, 4);
         cout << "---------------------------------" << endl;
         for(int i = 0; i < numeroDeProcessos; i++)
@@ -96,10 +97,9 @@ int main(int argc, char *argv[])
         {   
             // Envia o vetor de boundBoxes
             // MPI_Send(&vert_list, 5*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
-            data_size = 5*vizinhos[i].size();
+            data_size = vizinhos[i].size();
             
             MPI_Send(&data_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-           // MPI_Send(vizinhos[i].data(), data_size, MPI_INT, i, 0, MPI_COMM_WORLD);
             MPI_Send(&vizinhos[i], data_size, MPI_INT, i, 0, MPI_COMM_WORLD);
 
             //// Envia as imagens
@@ -148,9 +148,23 @@ int main(int argc, char *argv[])
 
     //////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
-    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4);
-    imshow("image", recon);
-    waitKey();
+    std::queue<int> xQ;
+    std::queue<int> yQ;
+    // Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4);
+    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQ, yQ);
+    
+    int qSize = xQ.size();
+    cout << qSize << " elements of rank: " << rank << endl;
+    for (int q = 0; q < qSize; q++)
+    {
+        cout << "X: " << xQ.front() << " Y: " << yQ.front() << endl;
+        xQ.pop();
+        yQ.pop();
+    }
+    
+    
+    // imshow("image", recon);
+    // waitKey();
     // Finaliza programacao distribuida
     MPI_Finalize();
     return 0;

@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <queue>
-#include <iostream>
-using namespace std;
 #include <limits>
 #include <list>
 #include <omp.h>
+#include <iostream>
+#include <mpi.h>
 
 #include "MorphologicOperations.h"
 using namespace cv;
@@ -25,7 +25,8 @@ inline void propagate(const Mat& image, Mat& output, std::queue<int>& xQ, std::q
 }
 
 template <typename T>
-Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
+Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity, std::queue<int> xQ, std::queue<int> yQ) {
+// Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	CV_Assert(image.channels() == 1);
 	CV_Assert(seeds.channels() == 1);
 
@@ -39,8 +40,10 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	int xminus, xplus, yminus, yplus;
 	int maxx = output.cols - 1;
 	int maxy = output.rows - 1;
-	std::queue<int> xQ;
-	std::queue<int> yQ;
+	// std::queue<int> xQ;
+	// std::queue<int> yQ;
+	std::queue<int> xSend;
+	std::queue<int> ySend;
 	T* oPtr;
 	T* oPtrMinus;
 	T* oPtrPlus;
@@ -131,12 +134,8 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 //	T qval, ival;
 	int x, y;
 	count = 0;
-	while (1) {
-		if (xQ.empty())
-		{
-			// MPI_Recv(&vert_list, 5*numeroDeProcessos, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			break;
-		}
+	while (!(xQ.empty())) 
+	{
 
 		++count;
 		x = xQ.front();
@@ -161,16 +160,43 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 		if (y > 0) {
 			propagate<T>(input, output, xQ, yQ, x, yminus, iPtrMinus, oPtrMinus, pval);
 		}
+		else
+		{
+			std::cout << "ADD X: " << x << " Y: " << y << std::endl;
+			xSend.push(x);
+			ySend.push(y);
+		}
+		
 		if (y < maxy) {
 			propagate<T>(input, output, xQ, yQ, x, yplus, iPtrPlus, oPtrPlus,pval);
 		}
+		else
+		{
+			std::cout << "ADD X: " << x << " Y: " << y << std::endl;
+			xSend.push(x);
+			ySend.push(y);
+		}
+		
 		if (x > 0) {
 			propagate<T>(input, output, xQ, yQ, xminus, y, iPtr, oPtr,pval);
 		}
+		else
+		{
+			std::cout << "ADD X: " << x << " Y: " << y << std::endl;
+			xSend.push(x);
+			ySend.push(y);
+		}
+		
 		if (x < maxx) {
 			propagate<T>(input, output, xQ, yQ, xplus, y, iPtr, oPtr,pval);
 		}
-
+		else
+		{
+			std::cout << "ADD X: " << x << " Y: " << y << std::endl;
+			xSend.push(x);
+			ySend.push(y);
+		}
+		
 		// now 8 connected
 		if (connectivity == 8) {
 
@@ -200,6 +226,37 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 //	std::cout << "	queue time = " << t3-t2 << "ms for " << count << " queue entries "<< std::endl;
 
 //	std::cout <<  count << " queue entries "<< std::endl;
+	int Qsize = xSend.size();
+	int i;
+	for (i = 0; i <= maxx; i++)
+	{
+			std::cout << output.ptr<T>(0)[i] << std::endl;
+
+		if (output.ptr(0)[i] != 0)
+		xQ.push( i );
+		yQ.push( 0 );
+	}
+	for (i = 0; i <= maxx; i++)
+	{
+			std::cout << output.ptr<T>(maxy)[i] << std::endl;
+		if (output.ptr(maxy)[i] != 0)
+		xQ.push( i );
+		yQ.push( maxy );
+	}
+	for (i = 1; i < maxy; i++)
+	{
+			std::cout << output.ptr<T>(i)[0] << std::endl;
+		if (output.ptr(i)[0] != 0)
+		xQ.push( 0 );
+		yQ.push( i );
+	}
+	for (i = 1; i < maxy; i++)
+	{
+			std::cout << output.ptr<T>(i)[maxx] << std::endl;
+		if (output.ptr(i)[maxx] != 0)
+		xQ.push( maxx );
+		yQ.push( i );
+	}
 
 	return output(Range(1, maxy), Range(1, maxx));
 
@@ -207,8 +264,14 @@ Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 
 
 //template Mat imreconstructGeorge<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<unsigned short int>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<float>(const Mat& seeds, const Mat& image, int connectivity);
 
+
+// template DllExport Mat imreconstruct<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<unsigned char>(const Mat& seeds, const Mat& image, int connectivity,std::queue<int> xQ, std::queue<int> yQ);
+
+// template DllExport Mat imreconstruct<unsigned short int>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<unsigned short int>(const Mat& seeds, const Mat& image, int connectivity,std::queue<int> xQ, std::queue<int> yQ);
+
+// template DllExport Mat imreconstruct<float>(const Mat& seeds, const Mat& image, int connectivity);
+template DllExport Mat imreconstruct<float>(const Mat& seeds, const Mat& image, int connectivity,std::queue<int> xQ, std::queue<int> yQ);
 }
