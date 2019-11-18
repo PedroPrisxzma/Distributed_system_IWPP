@@ -22,10 +22,8 @@ vector<vector<BoundBox>> FindNeighbours(BoundBox* listaDeImagens, int size, int 
     {   
         vizinhos[i] = vector<BoundBox>(0);
 
-        cout << "PING!!! " << endl;
         int x_left_i = listaDeImagens[i].coordinateX;
         int x_right_i = listaDeImagens[i].coordinateX + listaDeImagens[i].edgeX;
-        cout << "PONG??? " << endl;
 
         int y_up_i = listaDeImagens[i].coordinateY;
         int y_bot_i = listaDeImagens[i].coordinateY + listaDeImagens[i].edgeY;      
