@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
     // << vert_list[rank].edgeX << "  "   
     // << vert_list[rank].edgeY << endl; 
 
-    // imshow("image", imgblock);
-    // waitKey();
+    imshow("image", imgblock);
+    waitKey();
     // imshow("image", mskblock);
     // waitKey();
         

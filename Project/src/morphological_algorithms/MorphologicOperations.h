@@ -13,7 +13,7 @@ namespace nscale {
 // DOES NOT WORK WITH MULTICHANNEL.
 template <typename T>
 // cv::Mat imreconstruct(const cv::Mat& seeds, const cv::Mat& image, int connectivity);
-cv::Mat imreconstruct(const cv::Mat& seeds, const cv::Mat& image, int connectivity,std::queue<int> xQ, std::queue<int> yQ);
+cv::Mat imreconstruct(const cv::Mat& seeds, const cv::Mat& image, int connectivity,std::queue<int> &xQ, std::queue<int> &yQ);
 
 }
 #endif

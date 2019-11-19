@@ -24,11 +24,13 @@ void matsnd(Mat& m,int dest){
     // https://stackoverflow.com/questions/43502254/what-is-an-optimal-way-to-send-opencv-mat-over-mpi
     int bytespersample=1; // change if using shorts or floats
     int bytes=m.rows*m.cols*channels*bytespersample;
-    cout << "matsnd: rows=" << rows << endl;
-    cout << "matsnd: cols=" << cols << endl;
-    cout << "matsnd: type=" << type << endl;
-    cout << "matsnd: channels=" << channels << endl;
-    cout << "matsnd: bytes=" << bytes << endl;  
+
+    // cout << "matsnd: rows=" << rows << endl;
+    // cout << "matsnd: cols=" << cols << endl;
+    // cout << "matsnd: type=" << type << endl;
+    // cout << "matsnd: channels=" << channels << endl;
+    // cout << "matsnd: bytes=" << bytes << endl;  
+
     if(!m.isContinuous())
     { 
        m = m.clone();
@@ -46,10 +48,10 @@ Mat matrcv(int src){
     memcpy((uchar*)&cols,&buffer[1 * sizeof(int)], sizeof(int));
     memcpy((uchar*)&type,&buffer[2 * sizeof(int)], sizeof(int));
 
-    cout << "matrcv: Count=" << count << endl;
-    cout << "matrcv: rows=" << rows << endl;
-    cout << "matrcv: cols=" << cols << endl;
-    cout << "matrcv: type=" << type << endl;
+    // cout << "matrcv: Count=" << count << endl;
+    // cout << "matrcv: rows=" << rows << endl;
+    // cout << "matrcv: cols=" << cols << endl;
+    // cout << "matrcv: type=" << type << endl;
 
     // Make the mat
     Mat received= Mat(rows,cols,type,(uchar*)&buffer[3*sizeof(int)]);
