@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     vector<BoundBox> rankNeighbours;
     vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas       
+    BoundBox *rankVertices;
+    rankVertices = (BoundBox *)malloc(sizeof(BoundBox ));
 
 
     if (rank == 0)
@@ -96,9 +98,12 @@ int main(int argc, char *argv[])
 
         for(int i=1; i<numeroDeProcessos; i++)
         {   
+            MPI_Send(&vert_list[i], sizeof(boundBox), MPI_INT, i, 0, MPI_COMM_WORLD);
+
+
             // Envia o vetor de boundBoxes
             // MPI_Send(&vert_list, 5*numeroDeProcessos, MPI_INT, i, 0, MPI_COMM_WORLD);
-            data_size = vizinhos[i].size();
+            data_size = vizinhos[i].size()*sizeof(boundBox);
             
             MPI_Send(&data_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             MPI_Send(&vizinhos[i], data_size, MPI_INT, i, 0, MPI_COMM_WORLD);
@@ -109,12 +114,15 @@ int main(int argc, char *argv[])
             
         }
 
+        memcpy(rankVertices,&vert_list[0], sizeof(boundBox));
+        cout << "size rank 0 x: " << rankVertices->edgeX << " y: " << rankVertices->edgeY << endl;
         rankNeighbours = vizinhos[0];
         imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
         mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
     }
     else
     {
+        MPI_Recv(rankVertices, sizeof(boundBox), MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         // Recebe o vetor de boundBoxes
         MPI_Recv(&data_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -129,20 +137,20 @@ int main(int argc, char *argv[])
     }
     
 
-    imshow("image final "+to_string(rank), imgblock);
-    waitKey();
+    // imshow("image final "+to_string(rank), imgblock);
+    // waitKey();
        
-    imshow("mask final "+to_string(rank), mskblock);
-    waitKey();
+    // imshow("mask final "+to_string(rank), mskblock);
+    // waitKey();
         
         
     //////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
 
-    Mat recon = imReconstructAdm(imgblock, mskblock, rankNeighbours, rank);
+    Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices ,rankNeighbours, rank, numeroDeProcessos);
 
-    // imshow("image", recon);
-    // waitKey();
+    imshow("image", recon);
+    waitKey();
     // Finaliza programacao distribuida
     MPI_Finalize();
     return 0;

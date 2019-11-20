@@ -6,6 +6,6 @@
 #include <queue>
 #include "../classes/imageChunk.h"
 
-Mat imReconstructAdm(Mat imgblock, Mat mskblock, vector<BoundBox> rankNeighbours, int rank);
+Mat imReconstructAdm(Mat imgblock, Mat mskblock,BoundBox rankVertices, vector<BoundBox> rankNeighbours, int rank, int numeroDeProcessos);
 
 #endif
