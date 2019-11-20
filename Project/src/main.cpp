@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numeroDeProcessos);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    BoundBox* vert_list;
     vector<BoundBox> rankNeighbours;
     vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas       
 
@@ -66,7 +65,8 @@ int main(int argc, char *argv[])
         cout << inputImage.size << endl;
 
         ImageChunk imageBlocks = separate_image(inputImage, inputMask, numeroDeProcessos);
-
+       
+        BoundBox* vert_list;
         vert_list = (BoundBox*)malloc(numeroDeProcessos*sizeof(BoundBox));
 
         for(int i=0; i<numeroDeProcessos; i++)
@@ -102,14 +102,11 @@ int main(int argc, char *argv[])
             MPI_Send(&data_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             MPI_Send(&vizinhos[i], data_size, MPI_INT, i, 0, MPI_COMM_WORLD);
 
-            //// Envia as imagens
-            matsnd(imageBlocks.vetorDeImagens[i], i);
-            matsnd(imageBlocks.vetorDeMascaras[i], i);
+            // Envia as imagens
+            matsnd(imageBlocks.vetorDeImagens[i], i, 0);
+            matsnd(imageBlocks.vetorDeMascaras[i], i, 1);
             
         }
-
-        // Esse free não pode estar aqui
-        //free(vert_list);
 
         rankNeighbours = vizinhos[0];
         imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
@@ -118,9 +115,7 @@ int main(int argc, char *argv[])
     else
     {
         // Recebe o vetor de boundBoxes
-        cout << "PING !!" << endl;
         MPI_Recv(&data_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        cout << "PONG ??" << endl;
 
         rankNeighbours.resize(data_size);
         
@@ -128,38 +123,32 @@ int main(int argc, char *argv[])
         
         
         // Recebe as imagens
-        imgblock = matrcv(0);
-        mskblock = matrcv(0);
+        imgblock = matrcv(0, 0);
+        mskblock = matrcv(0, 1);
     }
     
-    //cout << "rank" << rank << "  " 
-    // << vert_list[rank].coordinateX << "  " 
-    // << vert_list[rank].coordinateY << "  " 
-    // << vert_list[rank].edgeX << "  "   
-    // << vert_list[rank].edgeY << endl; 
 
-    imshow("image", imgblock);
+    imshow("image final "+to_string(rank), imgblock);
     waitKey();
-    // imshow("image", mskblock);
-    // waitKey();
+       
+    imshow("mask final "+to_string(rank), mskblock);
+    waitKey();
         
-    //cout << imageChunk.vetorDeVertices << endl << imageChunk.vetorDeImagens << endl;
         
-
     //////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
-    std::queue<int> xQ;
-    std::queue<int> yQ;
+    std::queue<int> xQueue;
+    std::queue<int> yQueue;
     // Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4);
-    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQ, yQ);
+    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
     
-    int qSize = xQ.size();
-    cout << qSize << " elements of rank: " << rank << endl;
-    for (int q = 0; q < qSize; q++)
+    int queueSize = xQueue.size();
+    cout << queueSize << " elements of rank: " << rank << endl;
+    for (int q = 0; q < queueSize; q++)
     {
-        cout << "X: " << xQ.front() << " Y: " << yQ.front() << endl;
-        xQ.pop();
-        yQ.pop();
+        cout << "X: " << xQueue.front() << " Y: " << yQueue.front() << endl;
+        xQueue.pop();
+        yQueue.pop();
     }
     
     

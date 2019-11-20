@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
-void matsnd(Mat& m,int dest);
-Mat matrcv(int src);
+void matsnd(Mat& m, int dest, int image_or_mask);
+Mat matrcv(int src, int image_or_mask);
 
 #endif
