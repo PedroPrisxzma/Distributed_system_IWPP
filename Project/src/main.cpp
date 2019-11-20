@@ -10,6 +10,7 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
+#include "morphological_algorithms/MorphologicAdministrator.h"
 #include "morphological_algorithms/MorphologicOperations.h"
 #include "image_handling/ImageSeparator.h"
 #include "image_handling/SendReceiveImage.h"
@@ -137,21 +138,9 @@ int main(int argc, char *argv[])
         
     //////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
-    std::queue<int> xQueue;
-    std::queue<int> yQueue;
-    // Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4);
-    Mat recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
-    
-    int queueSize = xQueue.size();
-    cout << queueSize << " elements of rank: " << rank << endl;
-    for (int q = 0; q < queueSize; q++)
-    {
-        cout << "X: " << xQueue.front() << " Y: " << yQueue.front() << endl;
-        xQueue.pop();
-        yQueue.pop();
-    }
-    
-    
+
+    Mat recon = imReconstructAdm(imgblock, mskblock, rankNeighbours, rank);
+
     // imshow("image", recon);
     // waitKey();
     // Finaliza programacao distribuida

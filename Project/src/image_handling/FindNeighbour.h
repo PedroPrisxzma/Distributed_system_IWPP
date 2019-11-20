@@ -1,12 +1,8 @@
 #ifndef __FINDNEIGHBOUR__
 #define __FINDNEIGHBOUR__
 #include <opencv2/opencv.hpp>
+#include "../classes/imageChunk.h"
 using namespace cv;
-
-typedef struct boundBox
-{
-    int coordinateX, coordinateY, edgeX, edgeY, rank;
-} BoundBox; 
 
 
 vector<vector<BoundBox>> FindNeighbours(BoundBox* lista, int size, int connectivity);

@@ -10,6 +10,11 @@ using namespace std;
 
 #include "vertices.h"
 
+typedef struct boundBox
+{
+    int coordinateX, coordinateY, edgeX, edgeY, rank;
+} BoundBox; 
+
 class ImageChunk
 {
     public:
