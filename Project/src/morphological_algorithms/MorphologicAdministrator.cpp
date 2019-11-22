@@ -21,8 +21,8 @@ using namespace cv;
 Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<BoundBox> rankNeighbours, int rank, int numeroDeProcessos)
 {
 
-    MPI_Request request;
-    MPI_Status status;
+    // MPI_Request request;
+    // MPI_Status status;
     //int coordinateX, coordinateY;
     
     std::queue<int> xQueue;
@@ -84,19 +84,18 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
             previousBorders.push_back(leftTopRightBotBorders[i]);
         }
 
+
         // Receive bordas, 
         if(leftNeighbour != -1)
         {
             int recebimentoBorda;
             Mat leftBorder;
-            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, leftNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, 1, MPI_INT, leftNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
              cout << "Left, recebimentoBorda: " << recebimentoBorda << endl;
             if(recebimentoBorda == 1)
             {
                 leftBorder = matrcv(leftNeighbour, 0);
                 cout << "Rank: " << rank << " received Left border from Rank: "<< leftNeighbour << endl;
-                imshow("leftBorder received by "+to_string(rank) + " from Rank: " +to_string(leftNeighbour), leftBorder);
-                waitKey();
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
                 // Atentar para posição (valor x e y) que o pixel deve ter na imagem
@@ -107,7 +106,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat topBorder;
-            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, topNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, 1, MPI_INT, topNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if(recebimentoBorda == 1)
             {
                 topBorder = matrcv(topNeighbour, 0);
@@ -121,7 +120,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat rightBorder;
-            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, rightNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, 1, MPI_INT, rightNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if(recebimentoBorda == 1)
             {
                 rightBorder = matrcv(rightNeighbour, 0);
@@ -135,10 +134,12 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat botBorder;
-            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, botNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, 1, MPI_INT, botNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            cout << "recebimentoBorda = " << recebimentoBorda << endl;
             if(recebimentoBorda == 1)
             {
                 botBorder = matrcv(botNeighbour, 0);
+                // TODO:
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
                 // Atentar para posição (valor x e y) que o pixel deve ter na imagem
@@ -175,24 +176,31 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<int> neighbours)
 {
     int neighboursLength = neighbours.size();
+    int bordaIndicator;
+    cout << "neighboursLength = " << neighboursLength << endl;
     for(int i=0; i < neighboursLength; i++)
     {
+        cout <<"neighbours["<<i<<"] = "<< neighbours[i] << endl;
+        if(neighbours[i] == -1) continue;
+        cout <<"neighbours["<<i<<"] pass " << endl;
+
         // Primeiro envio de borda
-        if(neighbours[i] != -1 && previousBorders.empty())
+        if(previousBorders.empty())
         {
             // Envia aviso de envio de borda, um inteiro = 1
-            int bordaIndicator = 1;
+            bordaIndicator = 1;
             MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
 
             // Envia borda
             matsnd(leftTopRightBotBorders[i], neighbours[i], 0);
+        cout << "*** Im here ***" << endl;
         }
         
         //Não enviei a borda atual ainda, envia borda
-        else if((neighbours[i] != -1) && (!imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i])) )
+        else if( !imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]) )
         {
             // Envia aviso de envio de borda, um inteiro = 1
-            int bordaIndicator = 1;
+            bordaIndicator = 1;
             MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
 
             // Envia borda
@@ -200,10 +208,11 @@ void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRigh
         }
 
         // Mesma borda de antes, enviar valor indicando que não houve mudança
-        else if((neighbours[i] != -1) && (imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i])))
+        else if(imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]))
         {
             // Envia aviso de não envio de borda, um inteiro = 0
-            MPI_Send(0, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
+            bordaIndicator = 0;
+            MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
         }
     }
 }
