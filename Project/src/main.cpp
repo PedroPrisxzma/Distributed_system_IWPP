@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     else
     {
         MPI_Recv(rankVertices, sizeof(boundBox), MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
         // Recebe o vetor de boundBoxes
         MPI_Recv(&data_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 

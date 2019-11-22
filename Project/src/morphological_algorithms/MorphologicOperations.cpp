@@ -62,7 +62,7 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 
 	//	uint64_t t1 = cci::common::event::timestampInUS();
 
-		int count = 0;
+	int count = 0;
 	if (xQ.empty())
 	{
 		// raster scan

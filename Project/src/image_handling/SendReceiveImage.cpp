@@ -69,7 +69,7 @@ Mat matrcv(int src, int image_or_mask){
     
     if(image_or_mask == 0)
     {
-        MPI_Recv(&buffer_image,sizeof(buffer_image),MPI_UNSIGNED_CHAR,src,image_or_mask,MPI_COMM_WORLD,&status);
+        MPI_Recv(&buffer_image, sizeof(buffer_image),MPI_UNSIGNED_CHAR,src,image_or_mask,MPI_COMM_WORLD,&status);
         
         MPI_Get_count(&status,MPI_UNSIGNED_CHAR,&count);
         
