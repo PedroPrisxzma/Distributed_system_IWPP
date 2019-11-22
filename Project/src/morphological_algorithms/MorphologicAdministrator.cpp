@@ -60,7 +60,8 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
         if(rank == 0)
         {
-            // Administrar fim
+            // TODO:
+            // Depois de feito os demais TODOs, Administrar fim no rank 0
         }
 
         // Aqui envia a borda para o vizinho, no caso envia a img em formato MAT 
