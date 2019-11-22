@@ -89,7 +89,9 @@ int main(int argc, char *argv[])
             cout << "Vizinhos de: " << i << endl;
             cout << "I -> cX: "  << vert_list[i].coordinateX << " cY: " << vert_list[i].coordinateY << " eX: " << vert_list[i].edgeX << " eY: " << vert_list[i].edgeY<< endl;
             cout << " --------------------------- " << vizinhos[i].size() << endl;
-            for(int j = 0; j < vizinhos[i].size(); j++)
+            
+            int currentVizinhosLenght = vizinhos[i].size();
+            for(int j = 0; j < currentVizinhosLenght; j++)
             {
                 cout << "J -> cX: "  << vizinhos[i][j].coordinateX << " cY: " << vizinhos[i][j].coordinateY << " eX: " << vizinhos[i][j].edgeX << " eY: " << vizinhos[i][j].edgeY<< endl;
                 cout << endl;
@@ -131,6 +133,17 @@ int main(int argc, char *argv[])
         
         MPI_Recv(&rankNeighbours[0], data_size, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
+        int size = rankNeighbours.size();
+        for(int i =0; i < size; i++)
+        {
+            cout<< "Rank: " << rank << "  rankNeighbour["<< i <<"].rank: " << rankNeighbours[i].rank << endl;
+            cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
+            cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
+            cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].edgeX: " << rankNeighbours[i].edgeX << endl;
+            cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].edgeY: " << rankNeighbours[i].edgeY << endl;       
+        }
+
+        
         
         // Recebe as imagens
         imgblock = matrcv(0, 0);
@@ -147,8 +160,7 @@ int main(int argc, char *argv[])
         
     //////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
-
-    Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices ,rankNeighbours, rank, numeroDeProcessos);
+    Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
     imshow("image", recon);
     waitKey();

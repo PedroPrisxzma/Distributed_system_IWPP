@@ -264,7 +264,7 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 		y = ySend.front();
 		y = (y == 0) ? -1 : y;
 
-		std::cout << "ADD X: " << x << " Y: " << y << std::endl;
+		//std::cout << "ADD X: " << x << " Y: " << y << std::endl;
 
 		xQ.push(x);
 		yQ.push(y);

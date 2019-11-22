@@ -23,18 +23,18 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
     MPI_Request request;
     MPI_Status status;
-    int coordinateX, coordinateY;
+    //int coordinateX, coordinateY;
     
     std::queue<int> xQueue;
     std::queue<int> yQueue;
 
-    vector<vector<int>> sendListX(rankNeighbours.size());
-    vector<vector<int>> sendListY(rankNeighbours.size());
+    //vector<vector<int>> sendListX(rankNeighbours.size());
+    //vector<vector<int>> sendListY(rankNeighbours.size());
     
-    vector<int> reciveListX(rankNeighbours.size());
-    vector<int> reciveListY(rankNeighbours.size());
+    //vector<int> reciveListX(rankNeighbours.size());
+    //vector<int> reciveListY(rankNeighbours.size());
     
-    int xLeft, xRigth, yTop, yBotton, sendRank;
+    //int xLeft, xRigth, yTop, yBotton, sendRank;
 
     // sendListX.resize(numeroDeProcessos);
     // sendListY.resize(numeroDeProcessos);
@@ -54,24 +54,34 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         int rightNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 2);
         int botNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 3);
         
-        vector<int> neighbours = [leftNeighbour, topNeighbour, rightNeighbour, botNeighbour];
+        vector<int> neighbours = {leftNeighbour, topNeighbour, rightNeighbour, botNeighbour};
         
-        vector<Mat> previousBorders;
-
-        if(rank == 0)
+        for(int i =0; i < 4; i++)
         {
-            // TODO:
-            // Depois de feito os demais TODOs, Administrar fim no rank 0
+            cout<< "Rank: " << rank << "  Neighbour["<< i <<"]: " <<neighbours[i]<< endl; 
         }
+        
+        //int size = rankNeighbours.size();
+        //for(int i =0; i < size; i++)
+        //{
+        //    cout<< "Rank: " << rank << "  rankNeighbour["<< i <<"].rank: " << rankNeighbours[i].rank << endl;
+        //    cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
+        //    cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
+        //    cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].edgeX: " << rankNeighbours[i].edgeX << endl;
+        //    cout<< "    Rank: " << rank << "  rankNeighbour["<< i <<"].edgeY: " << rankNeighbours[i].edgeY << endl;       
+        //}
+
+        vector<Mat> previousBorders;
 
         // Aqui envia a borda para o vizinho, no caso envia a img em formato MAT 
         // (é literalmente os Z pixéis da imagem na borda), vamos tratar eles depois do recv.
         sendBorderToNeighbours(previousBorders, leftTopRightBotBorders, neighbours);
 
         // Update last sent borders
-        for(int i =0; i < leftTopRightBotBorders.size(); i++)
+        int leftTopRightBotBordersLenght = leftTopRightBotBorders.size();
+        for(int i =0; i < leftTopRightBotBordersLenght; i++)
         {
-            previousBorders.push_back(leftTopRightBotBorders[i])
+            previousBorders.push_back(leftTopRightBotBorders[i]);
         }
 
         // Receive bordas, 
@@ -79,12 +89,17 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat leftBorder;
-            MPI_Recv(recebimentoBorda, sizeof(int), MPI_INT, leftNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, leftNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+             cout << "Left, recebimentoBorda: " << recebimentoBorda << endl;
             if(recebimentoBorda == 1)
             {
                 leftBorder = matrcv(leftNeighbour, 0);
+                cout << "Rank: " << rank << " received Left border from Rank: "<< leftNeighbour << endl;
+                imshow("leftBorder received by "+to_string(rank) + " from Rank: " +to_string(leftNeighbour), leftBorder);
+                waitKey();
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
+                // Atentar para posição (valor x e y) que o pixel deve ter na imagem
             }
         }
 
@@ -92,12 +107,13 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat topBorder;
-            MPI_Recv(recebimentoBorda, sizeof(int), MPI_INT, topNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, topNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if(recebimentoBorda == 1)
             {
-                leftBorder = matrcv(topNeighbour, 0);
+                topBorder = matrcv(topNeighbour, 0);
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
+                // Atentar para posição (valor x e y) que o pixel deve ter na imagem            
             }
         }
 
@@ -105,12 +121,13 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat rightBorder;
-            MPI_Recv(recebimentoBorda, sizeof(int), MPI_INT, rightNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, rightNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if(recebimentoBorda == 1)
             {
-                leftBorder = matrcv(rightNeighbour, 0);
+                rightBorder = matrcv(rightNeighbour, 0);
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
+                // Atentar para posição (valor x e y) que o pixel deve ter na imagem
             }
         }
         
@@ -118,95 +135,38 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
         {
             int recebimentoBorda;
             Mat botBorder;
-            MPI_Recv(recebimentoBorda, sizeof(int), MPI_INT, botNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&recebimentoBorda, sizeof(int), MPI_INT, botNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if(recebimentoBorda == 1)
             {
-                leftBorder = matrcv(botNeighbour, 0);
+                botBorder = matrcv(botNeighbour, 0);
                 // TODO:
                 // tratar pixeis, inserindo nas Queues
+                // Atentar para posição (valor x e y) que o pixel deve ter na imagem
             }
         }
 
         //TODO:
         // Fazer as chamadas abaixo com os dados atualizados
-        //reconstructedImage = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
-        //leftTopRightBotBorders = getBorders(reconstructedImage);
+        
+        // Se as filas xQueue e yQueue não estiverem vazias
+            // reconstructedImage = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
+            // leftTopRightBotBorders = getBorders(reconstructedImage);
+            // Notificar rank 0 que não acabou, rank 0 deve então pedir para todos que acabaram 
+            // rodarem de novo, pq alguem não acabou.
 
+        // Se estiverem vazias, notificar processo 0, que "Acabei"
+            // esperar ser notificado pelo processo 0 que todos acabaram, 
+            // ou que devo tentar processar denovo
 
+        if(rank == 0)
+        {
+            // TODO:
+            // Depois de feito os demais TODOs, Administrar fim no rank 0
+        }
 
-
-//
-    //    recon = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
-
-    //    int queueSize = xQueue.size();
-    //    cout << queueSize << " elements of rank: " << rank << endl;
-    //    for (int q = 0; q < queueSize; q++)
-    //    {
-    //        coordinateX = xQueue.front() + rankVertices.coordinateX;
-    //        coordinateY = yQueue.front() + rankVertices.coordinateY;
-    //        cout << "X: " << coordinateX << " Y: " << coordinateY << endl;
-    //        xQueue.pop();
-    //        yQueue.pop();
-    //        for (int r = 0; r < rankNeighbours.size(); r++)
-    //        {
-    //            xLeft = rankNeighbours[r].coordinateX;
-    //            xRigth = xLeft + rankNeighbours[r].edgeX;
-    //            yTop = rankNeighbours[r].coordinateY;
-    //            yBotton = yTop + rankNeighbours[r].edgeY;
-    //            sendRank = rankNeighbours[r].rank;
-
-    //            if (coordinateX >= xLeft && coordinateX <= xRigth &&
-    //                coordinateY >= yTop && coordinateY <= yBotton)
-    //            {
-    //                sendListX[sendRank].push_back(coordinateX - xLeft);
-    //                sendListY[sendRank].push_back(coordinateY - yTop);
-    //                cout << "send x: " << sendListX[sendRank].back() << " y: " << sendListY[sendRank].back() << endl;
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    for (int srank = 0; srank < numeroDeProcessos; srank++)
-    //    {
-    //        if (srank == rank)
-    //            continue;
-
-    //        queueSize = sendListX[srank].size() * sizeof(int);
-    //        cout << "queue size send: " << queueSize << " from: " << rank << " to: " << srank << endl;
-    //        MPI_Send(&queueSize, 1, MPI_INT, srank, 0, MPI_COMM_WORLD);
-    //        if (queueSize > 0)
-    //        {
-    //            MPI_Send(&sendListX[srank], queueSize, MPI_INT, srank, 0, MPI_COMM_WORLD);
-    //            MPI_Send(&sendListY[srank], queueSize, MPI_INT, srank, 0, MPI_COMM_WORLD);
-    //        }
-    //    }
-    //    for (int rrank = 0; rrank < numeroDeProcessos; rrank++)
-    //    {
-    //        if (rrank == rank)
-    //            continue;
-
-    //        MPI_Recv(&queueSize, 1, MPI_INT, rrank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //        cout << "queue size recive: " << queueSize << " from: " << rrank << " to: " << rank << endl;
-    //        if (queueSize > 0)
-    //        {
-    //            reciveListX.resize(queueSize);
-    //            reciveListY.resize(queueSize);
-    //            MPI_Recv(&reciveListX[0], queueSize, MPI_INT, rrank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //            MPI_Recv(&reciveListY[0], queueSize, MPI_INT, rrank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //            cout << "queue x size recive: " << reciveListX.size() << endl;
-    //            for (int i = 0; i < queueSize; i++)
-    //            {
-    //                cout << " x: " << reciveListX[i] << " y: " << reciveListY[i] << endl;
-    //                xQueue.push(reciveListX[i]);
-    //                yQueue.push(reciveListY[i]);
-    //            }
-    //        }
-    //    }
-    //    if (xQueue.size() == 0)
-    //    {
-    //        MPI_Wait(&request, &status);
-    //        break;
-    //    }
-//    
+        //TODO: 
+        // Remove break
+        break;
     }
 
     return reconstructedImage;
@@ -214,13 +174,15 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
 void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<int> neighbours)
 {
-    for(int i=0; i < neighbours.size(); i++)
+    int neighboursLength = neighbours.size();
+    for(int i=0; i < neighboursLength; i++)
     {
         // Primeiro envio de borda
         if(neighbours[i] != -1 && previousBorders.empty())
         {
             // Envia aviso de envio de borda, um inteiro = 1
-            MPI_Send(1, sizeof(int), MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
+            int bordaIndicator = 1;
+            MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
 
             // Envia borda
             matsnd(leftTopRightBotBorders[i], neighbours[i], 0);
@@ -230,7 +192,8 @@ void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRigh
         else if((neighbours[i] != -1) && (!imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i])) )
         {
             // Envia aviso de envio de borda, um inteiro = 1
-            MPI_Send(1, sizeof(int), MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
+            int bordaIndicator = 1;
+            MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
 
             // Envia borda
             matsnd(leftTopRightBotBorders[i], neighbours[i], 0);
@@ -240,7 +203,7 @@ void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRigh
         else if((neighbours[i] != -1) && (imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i])))
         {
             // Envia aviso de não envio de borda, um inteiro = 0
-            MPI_Send(0, sizeof(int), MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(0, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
         }
     }
 }
@@ -249,7 +212,8 @@ void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRigh
 vector<Mat> getBorders(Mat reconstructedImage)
 {
     vector<Mat> borders(4);
-    for(int i = 0; i < borders.size(); i++)
+    int bordersLength = borders.size();
+    for(int i = 0; i < bordersLength; i++)
     {
         borders[i] = extractBorders(reconstructedImage, i);
     }
@@ -297,11 +261,12 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
     int y_up_i = rankVertices.coordinateY;
     int y_bot_i = rankVertices.coordinateY + rankVertices.edgeY;   
     
+    int rankNeighboursLength = rankNeighbours.size();
+
     if(side == 0)// left border
     {
-        for(int i=0; i < rankNeighbours.size(); i++)
+        for(int i=0; i < rankNeighboursLength; i++)
         {
-            int x_left_j = rankNeighbours[i].coordinateX;
             int x_right_j = rankNeighbours[i].coordinateX + rankNeighbours[i].edgeX;
             
             int y_up_j = rankNeighbours[i].coordinateY;
@@ -318,12 +283,11 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 
     else if(side == 1)// top border
     {
-        for(int i=0; i < rankNeighbours.size(); i++)
+        for(int i=0; i < rankNeighboursLength; i++)
         {
             int x_left_j = rankNeighbours[i].coordinateX;
             int x_right_j = rankNeighbours[i].coordinateX + rankNeighbours[i].edgeX;
             
-            int y_up_j = rankNeighbours[i].coordinateY;
             int y_bot_j = rankNeighbours[i].coordinateY + rankNeighbours[i].edgeY;            
 
             if(CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
@@ -337,10 +301,9 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 
     else if(side == 2)// right border
     {
-        for(int i=0; i < rankNeighbours.size(); i++)
+        for(int i=0; i < rankNeighboursLength; i++)
         {
             int x_left_j = rankNeighbours[i].coordinateX;
-            int x_right_j = rankNeighbours[i].coordinateX + rankNeighbours[i].edgeX;
             
             int y_up_j = rankNeighbours[i].coordinateY;
             int y_bot_j = rankNeighbours[i].coordinateY + rankNeighbours[i].edgeY;            
@@ -356,13 +319,12 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 
     else if(side == 3)// bot border
     {
-        for(int i=0; i < rankNeighbours.size(); i++)
+        for(int i=0; i < rankNeighboursLength; i++)
         {
             int x_left_j = rankNeighbours[i].coordinateX;
             int x_right_j = rankNeighbours[i].coordinateX + rankNeighbours[i].edgeX;
             
             int y_up_j = rankNeighbours[i].coordinateY;
-            int y_bot_j = rankNeighbours[i].coordinateY + rankNeighbours[i].edgeY;            
 
             if(CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
                CheckIfNeighbour(y_bot_i, y_bot_i, y_up_j, y_up_j) )
