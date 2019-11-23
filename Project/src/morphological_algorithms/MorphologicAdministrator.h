@@ -7,6 +7,9 @@
 #include "../classes/imageChunk.h"
 
 Mat imReconstructAdm(Mat imgblock, Mat mskblock,BoundBox rankVertices, vector<BoundBox> rankNeighbours, int rank, int numeroDeProcessos);
+bool stopCondition(int rank, int numeroDeProcessos, int myState);
+int checkAllFinished(int myState, int rank, int numDeProcessos);
+void alertAllOtherProcesses(int state, int rank, int numeroDeProcessos);
 void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<int> neighbours);
 Mat extractBorders(Mat image, int side);
 vector<Mat> getBorders(Mat reconstructedImage);

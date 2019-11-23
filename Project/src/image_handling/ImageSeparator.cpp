@@ -97,7 +97,8 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
     }
     else
     {
-        factor = 2 + (rand() % (numProcessos - 1));
+        // Usar rand() para cortes irregulares
+        factor = 2 ;//+ (rand() % (numProcessos - 1));
         numProcessos_1 = numProcessos/factor;
         numProcessos_2 = numProcessos - numProcessos_1;
     }
@@ -106,7 +107,8 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
         //cout <<"..numProcessos_1: "<< numProcessos_1 << endl;
         //cout <<"..numProcessos_2: "<< numProcessos_2 << endl;
 
-    if (vertices.edgeX < vertices.edgeY)
+    // Usar (vertices.edgeX < vertices.edgeY) para cortar na horizontal e vertical
+    if (true) //(vertices.edgeX < vertices.edgeY) 
     {
         //cout << "valor de divisao:" << factor << endl
              //<< "TamanhoY " << vertices.edgeY << endl;
