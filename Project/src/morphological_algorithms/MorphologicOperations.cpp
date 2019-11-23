@@ -28,7 +28,7 @@ inline void propagate(const Mat &image, Mat &output, std::queue<int> &xQ, std::q
 }
 
 template <typename T>
-Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ)
+Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQueue, std::queue<int> &yQueue)
 {
 	// Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	CV_Assert(image.channels() == 1);
@@ -37,22 +37,19 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 	// imshow("image", image);
 	// waitKey();
 
+	//std::cout << "Tamanho da fila : " << xQ.size() << std::endl;
+
 	Mat output(seeds.size() + Size(2, 2), seeds.type());
 	copyMakeBorder(seeds, output, 1, 1, 1, 1, BORDER_CONSTANT, 0);
 	Mat input(image.size() + Size(2, 2), image.type());
 	copyMakeBorder(image, input, 1, 1, 1, 1, BORDER_CONSTANT, 0);
-	// imshow("image", output);
-	// imshow("image", input);
-	// waitKey();
-
+	
 	T pval, preval;
 	int xminus, xplus, yminus, yplus;
 	int maxx = output.cols - 1;
 	int maxy = output.rows - 1;
-	// std::queue<int> xQ;
-	// std::queue<int> yQ;
-	std::queue<int> xSend;
-	std::queue<int> ySend;
+	std::queue<int> xQ;
+	std::queue<int> yQ;
 	T *oPtr;
 	T *oPtrMinus;
 	T *oPtrPlus;
@@ -63,7 +60,10 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 	//	uint64_t t1 = cci::common::event::timestampInUS();
 
 	int count = 0;
-	if (xQ.empty())
+	
+	// Empty queue use Raster, else I received a border, so mark those spots on the border as white
+
+	if (xQueue.empty())
 	{
 		// raster scan
 		for (int y = 1; y < maxy; ++y)
@@ -147,6 +147,32 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 			}
 		}
 	}
+	else
+	{
+		int xPoint;
+		int yPoint;
+		int queueSize = xQueue.size();
+		for (int i = 0; i < queueSize; i++)
+		{
+		
+		---	xPoint = xQueue.front()==0 ? xQueue.front():xQueue.front()+1;
+			
+		---	yPoint = yQueue.front()==0 ? yQueue.front():yQueue.front()+1;
+			
+			oPtr = output.ptr<T>(yPoint);
+			oPtr[i] = 255;
+			
+
+			xQ.push(xPoint);
+			yQ.push(yPoint);
+			xQueue.pop();
+			yQueue.pop();
+		}
+		imshow("image", input);
+		imshow("image", output);	
+		waitKey();
+	}
+	
 
 	//	uint64_t t2 = cci::common::event::timestampInUS();
 	//	std::cout << "	scan time = " << t2-t1 << "ms for " << count << " queue entries."<< std::endl;
@@ -180,52 +206,28 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 		// look at the 4 connected components
 		if (y > 0)
 		{
-			if (yminus == 0)
-			{
-				// std::cout << "ADD X: " << x << " Y: " << yminus << std::endl;
-				xSend.push(x);
-				ySend.push(yminus);
-			}
 			propagate<T>(input, output, xQ, yQ, x, yminus, iPtrMinus, oPtrMinus, pval);
 		}
 
 		if (y < maxy)
-		{
-			if (yplus == maxy)
-			{
-				// std::cout << "ADD X: " << x << " Y: " << yplus << std::endl;
-				xSend.push(x);
-				ySend.push(yplus);
-			}
+		{	
 			propagate<T>(input, output, xQ, yQ, x, yplus, iPtrPlus, oPtrPlus, pval);
 		}
 
 		if (x > 0)
 		{
-			if (xminus == 0)
-			{
-				// std::cout << "ADD X: " << xminus << " Y: " << y << std::endl;
-				xSend.push(xminus);
-				ySend.push(y);
-			}
+		
 			propagate<T>(input, output, xQ, yQ, xminus, y, iPtr, oPtr, pval);
 		}
 
 		if (x < maxx)
 		{
-			if (xplus == maxx)
-			{
-				// std::cout << "ADD X: " << xplus << " Y: " << y << std::endl;
-				xSend.push(xplus);
-				ySend.push(y);
-			}
 			propagate<T>(input, output, xQ, yQ, xplus, y, iPtr, oPtr, pval);
 		}
 
 		// now 8 connected
 		if (connectivity == 8)
 		{
-
 			if (y > 0)
 			{
 				if (x > 0)
@@ -250,27 +252,11 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 			}
 		}
 	}
-
+	
 	//	uint64_t t3 = cci::common::event::timestampInUS();
 	//	std::cout << "	queue time = " << t3-t2 << "ms for " << count << " queue entries "<< std::endl;
 
 	//	std::cout <<  count << " queue entries "<< std::endl;
-	int Qsize = xSend.size();
-	int i;
-	for (i = 0; i < Qsize; i++)
-	{
-		x = xSend.front();
-		x = (x == 0) ? -1 : x;
-		y = ySend.front();
-		y = (y == 0) ? -1 : y;
-
-		//std::cout << "ADD X: " << x << " Y: " << y << std::endl;
-
-		xQ.push(x);
-		yQ.push(y);
-		xSend.pop();
-		ySend.pop();
-	}
 
 	return output(Range(1, maxy), Range(1, maxx));
 }

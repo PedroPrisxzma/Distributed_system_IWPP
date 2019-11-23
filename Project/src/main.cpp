@@ -100,19 +100,19 @@ int main(int argc, char *argv[])
 		// Acha vizinhos dos Chunks de imagens
 		vizinhos = FindNeighbours(vert_list, numeroDeProcessos, 4);
 		// cout << "---------------------------------" << endl;
-		for (int i = 0; i < numeroDeProcessos; i++)
-		{
+		//for (int i = 0; i < numeroDeProcessos; i++)
+		//{
 			// cout << "Vizinhos de: " << i << endl;
 			// cout << "I -> cX: " << vert_list[i].coordinateX << " cY: " << vert_list[i].coordinateY << " eX: " << vert_list[i].edgeX << " eY: " << vert_list[i].edgeY << endl;
 			// cout << " --------------------------- " << vizinhos[i].size() << endl;
 
-			int currentVizinhosLenght = vizinhos[i].size();
-			for (int j = 0; j < currentVizinhosLenght; j++)
-			{
+		//	int currentVizinhosLenght = vizinhos[i].size();
+		//	for (int j = 0; j < currentVizinhosLenght; j++)
+		//	{
 				// cout << "J -> cX: " << vizinhos[i][j].coordinateX << " cY: " << vizinhos[i][j].coordinateY << " eX: " << vizinhos[i][j].edgeX << " eY: " << vizinhos[i][j].edgeY << endl;
 				// cout << endl;
-			}
-		}
+		//	}
+		//}
 
 		for (int i = 1; i < numeroDeProcessos; i++)
 		{
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		}
 
 		memcpy(rankVertices, &vert_list[0], sizeof(BoundBox));
-		cout << "size rank 0 x: " << rankVertices->edgeX << " y: " << rankVertices->edgeY << endl;
+		//cout << "size rank 0 x: " << rankVertices->edgeX << " y: " << rankVertices->edgeY << endl;
 		rankNeighbours = vizinhos[0];
 		imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
 		mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
@@ -155,8 +155,8 @@ int main(int argc, char *argv[])
 		mskblock = matrcv(0, 1);
 	}
 
-	cout << "Rank: " << rank << ":" << rankVertices->rank << " vertices x: " << rankVertices->coordinateX << \
-	" y: " << rankVertices->coordinateY << " ex: " << rankVertices->edgeX << " ey: " << rankVertices->edgeY <<  endl;
+	//cout << "Rank: " << rank << ":" << rankVertices->rank << " vertices x: " << rankVertices->coordinateX << 
+	//" y: " << rankVertices->coordinateY << " ex: " << rankVertices->edgeX << " ey: " << rankVertices->edgeY <<  endl;
 
 	// int size = rankNeighbours.size();
 	// for (int i = 0; i < size; i++)

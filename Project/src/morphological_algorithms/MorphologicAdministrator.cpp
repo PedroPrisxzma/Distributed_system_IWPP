@@ -35,6 +35,9 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 	// Extract first time processing borders
 	vector<Mat> leftTopRightBotBorders = getBorders(reconstructedImage);
 	//0 is the left border, 1 is the top border, 2 is the right border and 3 is the bottom border
+	
+	// Keeps track of the last borders that were sent.
+	vector<Mat> previousBorders;
 
 	while (true)
 	{
@@ -46,26 +49,28 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
 		vector<int> neighbours = {leftNeighbour, topNeighbour, rightNeighbour, botNeighbour};
 
-		for (int i = 0; i < 4; i++)
-		{
-			cout << "Rank: " << rank << "  Neighbour[" << i << "]: " << neighbours[i] << endl;
-		}
+		//for (int i = 0; i < 4; i++)
+		//{
+		//	cout << "Rank: " << rank << "  Neighbour[" << i << "]: " << neighbours[i] << endl;
+		//}
 
-		int size = rankNeighbours.size();
-		for (int i = 0; i < size; i++)
-		{
-			cout << "Rank: " << rank << "  rankNeighbour[" << i << "].rank: " << rankNeighbours[i].rank << endl;
-			cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
-			cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
-			cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeX: " << rankNeighbours[i].edgeX << endl;
-			cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeY: " << rankNeighbours[i].edgeY << endl;
-		}
+		// int size = rankNeighbours.size();
+		//for (int i = 0; i < size; i++)
+		//{
+		//	cout << "Rank: " << rank << "  rankNeighbour[" << i << "].rank: " << rankNeighbours[i].rank << endl;
+		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
+		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
+		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeX: " << rankNeighbours[i].edgeX << endl;
+		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeY: " << rankNeighbours[i].edgeY << endl;
+		//}
 
-		vector<Mat> previousBorders;
 
 		// Aqui envia a borda para o vizinho, no caso envia a img em formato MAT
 		// (é literalmente os Z pixéis da imagem na borda), vamos tratar eles depois do recv.
 		sendBorderToNeighbours(previousBorders, leftTopRightBotBorders, neighbours);
+		
+		// resets previous borders
+		previousBorders.clear();
 
 		// Update last sent borders
 		int leftTopRightBotBordersLenght = leftTopRightBotBorders.size();
@@ -97,7 +102,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 					{
 						xQueue.push(pointX);
 						yQueue.push(pointY);
-						cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 					}
 				}
 			}
@@ -123,7 +128,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 					{
 						xQueue.push(pointX);
 						yQueue.push(pointY);
-						cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 					}
 
 				}
@@ -142,7 +147,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 				// tratar pixeis, inserindo nas Queues
 				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
 				int imgBorderSize = rightBorder.rows * rightBorder.cols;
-				int pointX = rankVertices.coordinateX + rankVertices.edgeX;
+				int pointX = rankVertices.edgeX;
 				int pointY;
 				for (pointY = 0; pointY < imgBorderSize; pointY++)
 				{
@@ -150,7 +155,7 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 					{
 						xQueue.push(pointX);
 						yQueue.push(pointY);
-						cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 					}
 				}
 			}
@@ -171,14 +176,14 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
 				int imgBorderSize = botBorder.rows * botBorder.cols;
 				int pointX;
-				int pointY = rankVertices.coordinateY + rankVertices.edgeY;
+				int pointY = rankVertices.edgeY;
 				for (pointX = 0; pointX < imgBorderSize; pointX++)
 				{
 					if (0 < (int)botBorder.at<uchar>(pointX))
 					{
 						xQueue.push(pointX);
 						yQueue.push(pointY);
-						cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 					}
 				}
 			}
@@ -203,6 +208,8 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 		{
 			break;
 		}
+		// cout << "Sou o processo: " << rank << endl;
+		// getchar();
 	}
 
 	return reconstructedImage;
