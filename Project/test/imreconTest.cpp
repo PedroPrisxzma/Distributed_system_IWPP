@@ -69,7 +69,8 @@ int main(int argc, char **argv)
 	// recon.convertTo(recon, CV_8UC1, 1, 0);
 	// imwrite("test/out-recon4-cpu-usint-char.ppm", recon);
 	gettimeofday(&end_time, NULL);
-	printf("%.1f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e3);
+	printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
+
 
 #if defined(WITH_CUDA)
 	Stream stream;

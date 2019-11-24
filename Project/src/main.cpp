@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 		
 		// Encerra a contagem do tempo
 		gettimeofday(&end_time, NULL);
-		printf("%.1f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e3);
+		printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
 
 		imwrite("result.png",output);
 	}
