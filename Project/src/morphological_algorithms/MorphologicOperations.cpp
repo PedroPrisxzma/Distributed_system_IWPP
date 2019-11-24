@@ -265,6 +265,9 @@ Mat imreconstruct(int rank, std::queue<int> &borderValues, const Mat &seeds, con
 	//	std::cout << "	queue time = " << t3-t2 << "ms for " << count << " queue entries "<< std::endl;
 
 	//	std::cout <<  count << " queue entries "<< std::endl;
+	// imshow("image - output "+to_string(rank), output);	
+	// waitKey();
+	// destroyAllWindows();
 
 	return output(Range(1, maxy), Range(1, maxx));
 }

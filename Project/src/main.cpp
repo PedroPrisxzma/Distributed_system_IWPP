@@ -70,7 +70,9 @@ int main(int argc, char *argv[])
 	vector<vector<BoundBox>> vizinhos; // Lista de BoundBox listas
 	BoundBox *rankVertices;
 	rankVertices = (BoundBox *)malloc(sizeof(BoundBox));
+	BoundBox *vert_list = (BoundBox *)malloc(numeroDeProcessos * sizeof(BoundBox));
 
+	Mat inputImage;
 	if (rank == 0)
 	{
 		if (argc < 3)
@@ -79,14 +81,12 @@ int main(int argc, char *argv[])
 			throw std::exception();
 		}
 
-		Mat inputImage = image_reader(argv[1]);
+		inputImage = image_reader(argv[1]);
 		Mat inputMask = image_reader(argv[2]);
 		cout << inputImage.size << endl;
 
 		ImageChunk imageBlocks = separate_image(inputImage, inputMask, numeroDeProcessos);
 
-		BoundBox *vert_list;
-		vert_list = (BoundBox *)malloc(numeroDeProcessos * sizeof(BoundBox));
 
 		for (int i = 0; i < numeroDeProcessos; i++)
 		{
@@ -95,6 +95,11 @@ int main(int argc, char *argv[])
 			vert_list[i].edgeX = imageBlocks.vetorDeVertices[i].edgeX;
 			vert_list[i].edgeY = imageBlocks.vetorDeVertices[i].edgeY;
 			vert_list[i].rank = i;
+
+			cout << "Rank: "<<vert_list[i].rank<<endl;
+			cout << "Coordinate x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
+			cout << "Size x: "<<vert_list[i].edgeX<<" y: "<<vert_list[i].edgeY<<endl;
+
 		}
 
 		// Acha vizinhos dos Chunks de imagens
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
 		imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
 		mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
 
-		free(vert_list);
+		// free(vert_list);
 	}
 	else
 	{
@@ -180,8 +185,32 @@ int main(int argc, char *argv[])
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
 	//imshow("imgblock image "+to_string(rank), imgblock);
-	imshow("recon image "+to_string(rank), recon);
-	waitKey();
+	// imshow("recon image "+to_string(rank), recon);
+	// waitKey();
+
+	if (rank == 0)
+	{
+		Mat output(inputImage.size(), inputImage.type());
+		for (int i = 1; i < numeroDeProcessos; i++)
+		{
+			Mat recive =  matrcv(i,5);
+			cout << "Copy to x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
+			recive.copyTo(output(cv::Rect(vert_list[i].coordinateX,vert_list[i].coordinateY,recive.cols, recive.rows)));
+		// imshow("reconstruct image FINAL", output);
+		// waitKey();
+		}
+
+		cout << "Copy to x: "<<vert_list[0].coordinateX<<" y: "<<vert_list[0].coordinateY<<endl;
+		recon.copyTo(output(cv::Rect(0,0,recon.cols, recon.rows)));
+
+		imshow("reconstruct image FINAL", output);
+		waitKey();
+	}
+	else
+	{
+		matsnd(recon,0,5);
+	}
+	
 	
 	// Finaliza programacao distribuida
 	MPI_Finalize();

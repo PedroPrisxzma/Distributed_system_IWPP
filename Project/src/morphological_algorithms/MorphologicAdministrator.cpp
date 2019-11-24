@@ -214,7 +214,7 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 			{
 				xQueue.push(pointX);
 				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(0, pointY));
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
 				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 			}
 		}
@@ -227,12 +227,12 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 		int pointY = 0;
 		for (pointX = 0; pointX < imgBorderSize; pointX++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(pointX, 0))
+			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY))
 			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
 			{
 				xQueue.push(pointX);
 				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, 0));
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
 			//	cout << rank << ":	ADD top point (" << pointX << "," << pointY <<")" << endl;
 			}
 		}
@@ -245,12 +245,12 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 		int pointY;
 		for (pointY = 0; pointY < imgBorderSize; pointY++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(0, pointY))
+			if (255 == (int)receivedBorder.at<uchar>(pointX-1, pointY))
 			//if (0 < (int)receivedBorder.at<uchar>(0, pointY))
 			{
 				xQueue.push(pointX);
 				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(0, pointY));
+				borderValues.push((int)receivedBorder.at<uchar>(pointX-1, pointY));
 				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 			}
 		}
@@ -263,12 +263,12 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 		int pointY = rankVertices.edgeY;
 		for (pointX = 0; pointX < imgBorderSize; pointX++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(pointX, 0))
+			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY-1))
 			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
 			{
 				xQueue.push(pointX);
 				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, 0));
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY-1));
 				//cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
 			}	
 		}
