@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
 	//////////////////////////////////////////////////////////////////////////////////////
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
-	imshow("imgblock image "+to_string(rank), imgblock);
-	imshow("recon image "+to_string(rank), recon);
-	waitKey();
+	// imshow("imgblock image "+to_string(rank), imgblock);
+	// imshow("recon image "+to_string(rank), recon);
+	// waitKey();
 
 	if (rank == 0)
 	{
@@ -154,8 +154,9 @@ int main(int argc, char *argv[])
 		//cout << "Copy to x: "<<vert_list[0].coordinateX<<" y: "<<vert_list[0].coordinateY<<endl;
 		recon.copyTo(output(cv::Rect(0,0,recon.cols, recon.rows)));
 
-		imshow("reconstruct image FINAL", output);
-		waitKey();
+		// imshow("reconstruct image FINAL", output);
+		// waitKey();
+		imwrite("result.png",output);
 	}
 	else
 	{
