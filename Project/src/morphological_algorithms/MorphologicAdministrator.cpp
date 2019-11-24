@@ -265,28 +265,40 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	{
 		imshow("borda", receivedBorder);
 		waitKey();
-		for(int i = 0; i < receivedBorder.rows; i++)
+		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
-			for(int j = 0; j < receivedBorder.cols; j++)
+			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
 			{
-				cout << "pixel" << "(" << i << ", "<< j << ")"<< endl;
-				cout << "  Value: " << (int)receivedBorder.at<uchar>(i, j) << endl;
+				int pixelValue = (int)receivedBorder.at<uchar>(pointY, pointX);
+				cout << "pixel" << "(" << pointX << ", "<< pointY << ")"<< endl;
+				cout << "  Value: " << pixelValue << endl;
+
+				if(pixelValue == 255)
+				{
+					cout << rank <<":	ADD bot point (" << pointX << "," << + rankVertices.edgeY <<")" << endl;
+					cout << "	Value:"<< pixelValue << endl;
+					xQueue.push(pointX);
+					yQueue.push(pointY + rankVertices.edgeY);
+					borderValues.push(pixelValue);
+
+				}
 			}
 		}
-		int pointX;
-		int pointY = rankVertices.edgeY;
-		for (pointX = 0; pointX < imgBorderSize; pointX++)
-		{
-			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY))
-			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
-			{
-				xQueue.push(pointX);
-				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
-				cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
-				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
-			}	
-		}
+
+		//int pointX;
+		//int pointY = rankVertices.edgeY;
+		//for (pointX = 0; pointX < imgBorderSize; pointX++)
+		//{
+		//	if (255 == (int)receivedBorder.at<uchar>(pointY, pointX))
+		//	//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
+		//	{
+		//		xQueue.push(pointX);
+		//		yQueue.push(pointY);
+		//		borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
+		//		cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
+		//		cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
+		//	}	
+		//}
 	}
 
 	else
