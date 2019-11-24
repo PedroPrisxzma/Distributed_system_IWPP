@@ -1,14 +1,12 @@
-CC = g++
-# CC = mpic++
-CXXFLAGS = -Wall
+CC = mpic++
 CVFLAGS = `pkg-config --cflags --libs opencv` 
+CXXFLAGS = -Wall
 TFLAGS = -lpthread 
 
-M_SRCS = $(wildcard *.cpp) 	
-INC_SRCS = $(wildcard */*.cpp)
+M_SRCS = imreconTest.cpp
+INC_SRCS = ../src/morphological_algorithms/MorphologicOperations.cpp
 SRC = $(M_SRCS) $(INC_SRCS)
-H_SRCS = $(wildcard */)
-INC = $(H_SRCS:%=-I/%)
+INC = -I../src/morphological_algorithms/
 
 # SRCS = main.cpp 	
 # INC_SRCS = classes/vertices.cpp image_handling/ImageSeparator.cpp morphological_algorithms/MorphologicOperations.cpp 
