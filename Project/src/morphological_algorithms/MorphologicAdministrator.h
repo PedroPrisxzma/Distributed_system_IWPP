@@ -12,7 +12,7 @@ bool stopCondition(int rank, int numeroDeProcessos, int myState);
 int checkAllFinished(int myState, int rank, int numDeProcessos);
 void alertAllOtherProcesses(int state, int rank, int numeroDeProcessos);
 
-void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side);
+void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, BoundBox neighbour, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side);
 void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector<BoundBox>> neighbours, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues);
 
 void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<vector<BoundBox>> neighbours, BoundBox rankVertices);

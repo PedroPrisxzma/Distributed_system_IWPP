@@ -197,13 +197,16 @@ void  alertAllOtherProcesses(int state, int rank, int numeroDeProcessos)
 ///////////////////////////////////////////////////////////////////////////////////
 // Receive Borders from neighbours
 ///////////////////////////////////////////////////////////////////////////////////
-void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side)
+void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, BoundBox neighbour, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side)
 {
 	//int imgBorderSize = receivedBorder.rows * receivedBorder.cols;
 	
 	// left
 	if(side == 0)
 	{
+		int initialPixel = rankVertices.coordinateY > neighbour.coordinateY ? rankVertices.coordinateY : neighbour.coordinateY;
+		initialPixel = initialPixel - rankVertices.coordinateY;
+		
 		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
 			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
@@ -217,7 +220,7 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 					//cout << rank <<":	ADD top point (" << pointX << "," << pointY <<")" << endl;
 					//cout << "	Value:"<< pixelValue << endl;
 					xQueue.push(pointX);
-					yQueue.push(pointY);
+					yQueue.push(pointY + initialPixel);
 					borderValues.push(pixelValue);
 
 				}
@@ -228,6 +231,9 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// top
 	else if(side == 1)
 	{
+		int initialPixel = rankVertices.coordinateX > neighbour.coordinateX ? rankVertices.coordinateX : neighbour.coordinateX;
+		initialPixel = initialPixel - rankVertices.coordinateX;
+
 		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
 			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
@@ -240,7 +246,7 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 				{
 					//cout << rank <<":	ADD top point (" << pointX << "," << pointY <<")" << endl;
 					//cout << "	Value:"<< pixelValue << endl;
-					xQueue.push(pointX);
+					xQueue.push(pointX + initialPixel);
 					yQueue.push(pointY);
 					borderValues.push(pixelValue);
 
@@ -252,6 +258,9 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// right
 	else if(side == 2)
 	{
+		int initialPixel = rankVertices.coordinateY > neighbour.coordinateY ? rankVertices.coordinateY : neighbour.coordinateY;
+		initialPixel = initialPixel - rankVertices.coordinateY;
+		
 		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
 			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
@@ -265,7 +274,7 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 					//cout << rank <<":	ADD top point (" << pointX + rankVertices.edgeX << "," << pointY <<")" << endl;
 					//cout << "	Value:"<< pixelValue << endl;
 					xQueue.push(pointX + rankVertices.edgeX);
-					yQueue.push(pointY);
+					yQueue.push(pointY + initialPixel);
 					borderValues.push(pixelValue);
 
 				}
@@ -276,6 +285,9 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// bot
 	else if(side == 3)
 	{
+		int initialPixel = rankVertices.coordinateX > neighbour.coordinateX ? rankVertices.coordinateX : neighbour.coordinateX;
+		initialPixel = initialPixel - rankVertices.coordinateX;
+		
 		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
 			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
@@ -288,7 +300,7 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 				{
 					//cout << rank <<":	ADD bot point (" << pointX << "," << pointY+ rankVertices.edgeY <<")" << endl;
 					//cout << "	Value:"<< pixelValue << endl;
-					xQueue.push(pointX);
+					xQueue.push(pointX + initialPixel);
 					yQueue.push(pointY + rankVertices.edgeY);
 					borderValues.push(pixelValue);
 
@@ -325,8 +337,8 @@ void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector
 			{
 				receivedBorder = matrcv(neighbours[i][j].rank, 0);
 				cout << "Rank: " << rank << " received border from Rank: " << neighbours[i][j].rank << endl;
-				
-				addReceivedBorderCoordinatesToQueue(rank, rankVertices, receivedBorder, xQueue, yQueue, borderValues, i);
+			
+				addReceivedBorderCoordinatesToQueue(rank, rankVertices, neighbours[i][j], receivedBorder, xQueue, yQueue, borderValues, i);
 				
 			}
 		}
