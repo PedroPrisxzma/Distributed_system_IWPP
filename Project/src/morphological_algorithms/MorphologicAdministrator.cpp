@@ -640,8 +640,8 @@ vector<BoundBox> isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankN
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Aux function, use to print neighbours, rank indicates current node/process
 ///////////////////////////////////////////////////////////////////////////////////
+// Aux function, use to print neighbours, rank indicates current node/process
 void printNeighbours(int rank, vector<vector<BoundBox>> neighbours)
 {
 	for (int i = 0; i < 4; i++)
