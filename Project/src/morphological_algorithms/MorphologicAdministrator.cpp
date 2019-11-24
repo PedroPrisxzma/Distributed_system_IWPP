@@ -26,11 +26,12 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
 	std::queue<int> xQueue;
 	std::queue<int> yQueue;
+	std::queue<int>  borderValues;
 
 
 	Mat reconstructedImage;
 
-	reconstructedImage = nscale::imreconstruct<unsigned char>(imgblock, mskblock, 4, xQueue, yQueue);
+	reconstructedImage = nscale::imreconstruct<unsigned char>(rank, borderValues, imgblock, mskblock, 4, xQueue, yQueue);
 
 	// Extract first time processing borders
 	vector<Mat> leftTopRightBotBorders = getBorders(reconstructedImage);
@@ -38,36 +39,37 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 	
 	// Keeps track of the last borders that were sent.
 	vector<Mat> previousBorders;
-
+	int connectivity = 4;
 	while (true)
-	{
+	{	
+		// REMOVE COMENTARIO:
 		// Works only for up to 4 neighbours, one on each side
-		int leftNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 0);
-		int topNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 1);
-		int rightNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 2);
-		int botNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 3);
+		vector<BoundBox> leftNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 0);
+		vector<BoundBox> topNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 1);
+		vector<BoundBox> rightNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 2);
+		vector<BoundBox> botNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 3);
 
-		vector<int> neighbours = {leftNeighbour, topNeighbour, rightNeighbour, botNeighbour};
+		if(connectivity == 4)
+			removeDiagnals(leftNeighbour, topNeighbour, rightNeighbour, botNeighbour);
+		
+		else if(connectivity == 8)
+		{
+			//TODO:
+			// Tratar connectividade de 8 pixeis vizinhos
+		}
 
-		//for (int i = 0; i < 4; i++)
-		//{
-		//	cout << "Rank: " << rank << "  Neighbour[" << i << "]: " << neighbours[i] << endl;
-		//}
-
-		// int size = rankNeighbours.size();
-		//for (int i = 0; i < size; i++)
-		//{
-		//	cout << "Rank: " << rank << "  rankNeighbour[" << i << "].rank: " << rankNeighbours[i].rank << endl;
-		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
-		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
-		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeX: " << rankNeighbours[i].edgeX << endl;
-		//	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeY: " << rankNeighbours[i].edgeY << endl;
-		//}
-
-
+		vector<vector<BoundBox>> neighbours = {leftNeighbour, topNeighbour, rightNeighbour, botNeighbour};
+		
+		
+		if(false)
+		{
+			printNeighbours(rank, neighbours);
+		}
+		
 		// Aqui envia a borda para o vizinho, no caso envia a img em formato MAT
 		// (é literalmente os Z pixéis da imagem na borda), vamos tratar eles depois do recv.
-		sendBorderToNeighbours(previousBorders, leftTopRightBotBorders, neighbours);
+		if(true)
+			sendBorderToNeighbours(previousBorders, leftTopRightBotBorders, neighbours, rankVertices);
 		
 		// resets previous borders
 		previousBorders.clear();
@@ -78,123 +80,20 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 		{
 			previousBorders.push_back(leftTopRightBotBorders[i]);
 		}
+		
+		receiveBordersFromNeighbours(rank, rankVertices, neighbours, xQueue, yQueue, borderValues);		
 
-		// Receive bordas,
-		if (leftNeighbour != -1)
-		{
-			int recebimentoBorda;
-			Mat leftBorder;
-			MPI_Recv(&recebimentoBorda, 1, MPI_INT, leftNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			cout << "Left, recebimentoBorda: " << recebimentoBorda << endl;
-			if (recebimentoBorda == 1)
-			{
-				leftBorder = matrcv(leftNeighbour, 0);
-				cout << "Rank: " << rank << " received Left border from Rank: " << leftNeighbour << endl;
-				// TODO:
-				// tratar pixeis, inserindo nas Queues
-				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
-				int imgBorderSize = leftBorder.rows * leftBorder.cols;
-				int pointX = 0;
-				int pointY;
-				for (pointY = 0; pointY < imgBorderSize; pointY++)
-				{
-					if (0 < (int)leftBorder.at<uchar>(pointY))
-					{
-						xQueue.push(pointX);
-						yQueue.push(pointY);
-						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
-					}
-				}
-			}
-		}
-
-		if (topNeighbour != -1)
-		{
-			int recebimentoBorda;
-			Mat topBorder;
-			MPI_Recv(&recebimentoBorda, 1, MPI_INT, topNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			if (recebimentoBorda == 1)
-			{
-				topBorder = matrcv(topNeighbour, 0);
-				// TODO:
-				// tratar pixeis, inserindo nas Queues
-				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
-				int imgBorderSize = topBorder.rows * topBorder.cols;
-				int pointX;
-				int pointY = 0;
-				for (pointX = 0; pointX < imgBorderSize; pointX++)
-				{
-					if (0 < (int)topBorder.at<uchar>(pointX))
-					{
-						xQueue.push(pointX);
-						yQueue.push(pointY);
-						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
-					}
-
-				}
-			}
-		}
-
-		if (rightNeighbour != -1)
-		{
-			int recebimentoBorda;
-			Mat rightBorder;
-			MPI_Recv(&recebimentoBorda, 1, MPI_INT, rightNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			if (recebimentoBorda == 1)
-			{
-				rightBorder = matrcv(rightNeighbour, 0);
-				// TODO:
-				// tratar pixeis, inserindo nas Queues
-				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
-				int imgBorderSize = rightBorder.rows * rightBorder.cols;
-				int pointX = rankVertices.edgeX;
-				int pointY;
-				for (pointY = 0; pointY < imgBorderSize; pointY++)
-				{
-					if (0 < (int)rightBorder.at<uchar>(pointY))
-					{
-						xQueue.push(pointX);
-						yQueue.push(pointY);
-						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
-					}
-				}
-			}
-		}
-
-		if (botNeighbour != -1)
-		{
-			int recebimentoBorda;
-			Mat botBorder;
-			MPI_Recv(&recebimentoBorda, 1, MPI_INT, botNeighbour, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			cout << "recebimentoBorda = " << recebimentoBorda << endl;
-			if (recebimentoBorda == 1)
-			{
-				botBorder = matrcv(botNeighbour, 0);
-				// TODO:
-				// TODO:
-				// tratar pixeis, inserindo nas Queues
-				// Atentar para posição (valor x e y) que o pixel deve ter na imagem
-				int imgBorderSize = botBorder.rows * botBorder.cols;
-				int pointX;
-				int pointY = rankVertices.edgeY;
-				for (pointX = 0; pointX < imgBorderSize; pointX++)
-				{
-					if (0 < (int)botBorder.at<uchar>(pointX))
-					{
-						xQueue.push(pointX);
-						yQueue.push(pointY);
-						// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
-					}
-				}
-			}
-		}
-
-		//TODO:
-		// Fazer as chamadas abaixo com os dados atualizados
+		int myState = xQueue.empty() ? 1 : -1;
 
 		// Se as filas xQueue e yQueue não estiverem vazias
-		reconstructedImage = nscale::imreconstruct<unsigned char>(reconstructedImage, mskblock, 4, xQueue, yQueue);
-		leftTopRightBotBorders = getBorders(reconstructedImage);
+		
+		cout << rank << ": MEU ESTADO É " << myState << endl;
+		
+		if(myState == -1)
+		{
+			reconstructedImage = nscale::imreconstruct<unsigned char>(rank, borderValues, reconstructedImage, mskblock, 4, xQueue, yQueue);
+			leftTopRightBotBorders = getBorders(reconstructedImage);
+		}
 		
 		// Notificar rank 0 que não acabou, rank 0 deve então pedir para todos que acabaram
 		// rodarem de novo, pq alguem não acabou.
@@ -203,7 +102,6 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 		// esperar ser notificado pelo processo 0 que todos acabaram,
 		// ou que devo tentar processar denovo
 
-		int myState = xQueue.empty() ? 1 : -1;
 		if(stopCondition(rank, numeroDeProcessos, myState))
 		{
 			break;
@@ -215,6 +113,11 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 	return reconstructedImage;
 }
 
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// Check Stop Condition
+//////////////////////////////////////////////////////////////////////////////////
 bool stopCondition(int rank, int numeroDeProcessos, int myState)
 {
 	bool shouldStop;
@@ -251,9 +154,7 @@ int checkAllFinished(int myState, int rank, int numeroDeProcessos)
 	{
 		if(i == rank)
 		{
-			cout << "Vetor Finished, index: " << i << " Valor: "<< finished[i] << endl;
 			finished[i] = myState;
-			cout << "Atribuido: "<< myState << " Valor no vetor: " << finished[i] << endl;	
 		}
 		else
 		{
@@ -294,53 +195,271 @@ void  alertAllOtherProcesses(int state, int rank, int numeroDeProcessos)
 }
 
 
-void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<int> neighbours)
+///////////////////////////////////////////////////////////////////////////////////
+// Receive Borders from neighbours
+///////////////////////////////////////////////////////////////////////////////////
+void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side)
 {
-	int neighboursLength = neighbours.size();
-	int bordaIndicator;
-	for (int i = 0; i < neighboursLength; i++)
+	int imgBorderSize = receivedBorder.rows * receivedBorder.cols;
+	
+	// left
+	if(side == 0)
 	{
-		// Se o vizinho existe
-		if(neighbours[i] != -1)
+		int pointX = 0;
+		int pointY;
+		for (pointY = 0; pointY < imgBorderSize; pointY++)
 		{
-			// Primeiro envio de borda
-			if (previousBorders.empty())
+			if (255 == (int)receivedBorder.at<uchar>(0, pointY))
+			//if (0 < (int)receivedBorder.at<uchar>(0, pointY))
 			{
-				// Envia aviso de envio de borda, um inteiro = 1
-				cout << "Condição 0, Try to send to " << neighbours[i] << endl;
-				bordaIndicator = 1;
-				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
-
-				// Envia borda
-				matsnd(leftTopRightBotBorders[i], neighbours[i], neighbours[i]);
-				cout << "*** Im here ***" << endl;
+				xQueue.push(pointX);
+				yQueue.push(pointY);
+				borderValues.push((int)receivedBorder.at<uchar>(0, pointY));
+				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
 			}
+		}
+	}
 
-			//Não enviei a borda atual ainda, envia borda
-			else if (!imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]))
+	// top
+	else if(side == 1)
+	{
+		int pointX;
+		int pointY = 0;
+		for (pointX = 0; pointX < imgBorderSize; pointX++)
+		{
+			if (255 == (int)receivedBorder.at<uchar>(pointX, 0))
+			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
 			{
-				cout << "Condição 1, Try to send to " << neighbours[i] << endl;
-				// Envia aviso de envio de borda, um inteiro = 1
-				bordaIndicator = 1;
-				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
-
-				// Envia borda
-				matsnd(leftTopRightBotBorders[i], neighbours[i], 0);
+				xQueue.push(pointX);
+				yQueue.push(pointY);
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, 0));
+			//	cout << rank << ":	ADD top point (" << pointX << "," << pointY <<")" << endl;
 			}
+		}
+	}
 
-			// Mesma borda de antes, enviar valor indicando que não houve mudança
-			else if (imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]))
+	// right
+	else if(side == 2)
+	{
+		int pointX = rankVertices.edgeX;
+		int pointY;
+		for (pointY = 0; pointY < imgBorderSize; pointY++)
+		{
+			if (255 == (int)receivedBorder.at<uchar>(0, pointY))
+			//if (0 < (int)receivedBorder.at<uchar>(0, pointY))
 			{
-				cout << "Condição 2, Try to send to " << neighbours[i] << endl;
+				xQueue.push(pointX);
+				yQueue.push(pointY);
+				borderValues.push((int)receivedBorder.at<uchar>(0, pointY));
+				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+			}
+		}
+	}
 
-				// Envia aviso de não envio de borda, um inteiro = 0
-				bordaIndicator = 0;
-				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i], 0, MPI_COMM_WORLD);
+	// bot
+	else if(side == 3)
+	{
+		int pointX;
+		int pointY = rankVertices.edgeY;
+		for (pointX = 0; pointX < imgBorderSize; pointX++)
+		{
+			if (255 == (int)receivedBorder.at<uchar>(pointX, 0))
+			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
+			{
+				xQueue.push(pointX);
+				yQueue.push(pointY);
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, 0));
+				//cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
+			}	
+		}
+	}
+
+	else
+	{
+		cout << "side value of " << side << " was passed." << endl;
+		cout << " addReceivedBorderCoordinatesToQueue Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
+		throw std::exception();
+	}
+
+}
+
+
+void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector<BoundBox>> neighbours, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues)
+{
+	int lengthOfNeighbours = neighbours.size();
+	//int bordaIndicator;
+	for (int i = 0; i < lengthOfNeighbours; i++)
+	{
+		int listOfSideOfNeighboursLength = neighbours[i].size(); 
+		for(int j = 0; j <listOfSideOfNeighboursLength; j++)
+		{
+			int recebimentoBorda;
+			Mat receivedBorder;
+			MPI_Recv(&recebimentoBorda, 1, MPI_INT, neighbours[i][j].rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			cout << rank <<": recebimentoBorda = " << recebimentoBorda << endl;
+			if (recebimentoBorda == 1)
+			{
+				receivedBorder = matrcv(neighbours[i][j].rank, 0);
+				cout << "Rank: " << rank << " received border from Rank: " << neighbours[i][j].rank << endl;
+				
+				addReceivedBorderCoordinatesToQueue(rank, rankVertices, receivedBorder, xQueue, yQueue, borderValues, i);
+				
 			}
 		}
 	}
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////
+// Send Borders to neighbours
+///////////////////////////////////////////////////////////////////////////////////
+void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<vector<BoundBox>> neighbours, BoundBox rankVertices)
+{
+	int lengthOfNeighbours = neighbours.size();
+	int bordaIndicator;
+	for (int i = 0; i < lengthOfNeighbours; i++)
+	{
+		int listOfSideOfNeighboursLength = neighbours[i].size(); 
+		for(int j = 0; j <listOfSideOfNeighboursLength; j++)
+		{
+			Mat border = cutIntersection(leftTopRightBotBorders[i], rankVertices, neighbours[i][j], i);
+
+			// Primeiro envio de borda
+			if (previousBorders.empty())
+			{
+				// Envia aviso de envio de borda, um inteiro = 1
+				//cout << "Condição 0, Try to send to " << neighbours[i] << endl;
+				bordaIndicator = 1;
+				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i][j].rank, 0, MPI_COMM_WORLD);
+			
+				// Envia borda
+				matsnd(border, neighbours[i][j].rank, 0);
+				//cout << "*** Im here ***" << endl;
+			}
+			//Não enviei a borda atual ainda, envia borda
+			else if (!imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]))
+			{
+				//cout << "Condição 1, Try to send to " << neighbours[i] << endl;
+				// Envia aviso de envio de borda, um inteiro = 1
+				bordaIndicator = 1;
+				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i][j].rank, 0, MPI_COMM_WORLD);
+				// Envia borda
+				matsnd(border, neighbours[i][j].rank, 0);
+			}
+			// Mesma borda de antes, enviar valor indicando que não houve mudança
+			else if (imagesIsEqual(previousBorders[i], leftTopRightBotBorders[i]))
+			{
+				//cout << "Condição 2, Try to send to " << neighbours[i] << endl;
+				// Envia aviso de não envio de borda, um inteiro = 0
+				bordaIndicator = 0;
+				MPI_Send(&bordaIndicator, 1, MPI_INT, neighbours[i][j].rank, 0, MPI_COMM_WORLD);
+			}
+			
+		}
+	}
+}
+
+// Find start and end of an intersection on the border
+void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neighbourEdge, int &start, int &end)
+{
+	int endCoordinate = coordinate + edge;
+	int endNeighbourCoordinate = neighbourCoordinate + neighbourEdge;
+
+	cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
+	cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
+	
+	
+	start = coordinate > neighbourCoordinate ? coordinate : neighbourCoordinate;
+	end = endCoordinate < endNeighbourCoordinate ? endCoordinate : endNeighbourCoordinate;
+
+	// Maps the originals to a start point at 0, to use on the border image
+	start = start - coordinate;
+	end = end - coordinate -1;
+
+	cout << "		Conclusion: " << start << " to " << end <<endl;
+}
+
+// Get intersection exemple
+/*
+|   0
+| | 1  -> 1 - 0 = 1
+| | 2
+| | 3
+| | 4  -> 4 - 0 = 4 
+  | 5
+
+|   0
+| | 1  -> 1 - 0 = 1
+| | 2
+| | 3  -> 3 - 0 = 3
+| 	4
+
+
+on the border, cut from 1 to 4.
+*/
+
+// Cut out the intersection from the border to send to the neighnour
+Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, int side)
+{
+	//cout << "border being cut: " << endl;
+	//for(int i =0; i < borderToCut.cols; i++)
+	//{
+	//	for(int j =0; j < borderToCut.rows; j++)
+	//	{
+	//		cout << "(" << i << ", " << j << ") ";
+	//	}
+	//	cout << endl;
+	//}
+	//cout << " "  << borderToCut << endl << endl;
+
+	Mat cutBorder;
+	
+	if (side == 0) // left border
+	{
+		int start, end;
+		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
+		cout<< "Left: " << "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
+		cutBorder = borderToCut(Rect(0, start, 1, end));
+	}
+
+	else if (side == 1) // top border
+	{
+		int start, end;
+		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
+		cout << "Top: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
+		cutBorder = borderToCut(Rect(start, 0, end, 1));
+	}
+
+	else if (side == 2) // right border
+	{
+		int start, end;
+		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
+		cout << "Right: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
+		cutBorder = borderToCut(Rect(0, start, 1, end));
+
+	}
+
+	else if (side == 3) // bot border
+	{
+		int start, end;
+		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
+		cout << "Bot: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
+		cutBorder = borderToCut(Rect(start, 0, end, 1));
+	}
+
+	else
+	{
+		cout << " CutIntersection Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
+		throw std::exception();
+	}
+	
+	return cutBorder;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// Border extraction functions
+///////////////////////////////////////////////////////////////////////////////////
 vector<Mat> getBorders(Mat reconstructedImage)
 {
 	vector<Mat> borders(4);
@@ -379,14 +498,18 @@ Mat extractBorders(Mat image, int side)
 
 	else
 	{
-		cout << " Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
+		cout << " extractBorders Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
 		throw std::exception();
 	}
 
 	return border;
 }
 
-int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, int side)
+
+///////////////////////////////////////////////////////////////////////////////////
+// Find all neighbours on one side, choose side with the int side parameter
+///////////////////////////////////////////////////////////////////////////////////
+vector<BoundBox> isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, int side)
 {
 	int x_left_i = rankVertices.coordinateX;
 	int x_right_i = rankVertices.coordinateX + rankVertices.edgeX;
@@ -394,6 +517,13 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 	int y_bot_i = rankVertices.coordinateY + rankVertices.edgeY;
 
 	int rankNeighboursLength = rankNeighbours.size();
+
+	vector<BoundBox> leftNeighbours;
+	vector<BoundBox> topNeighbours;
+	vector<BoundBox> rightNeighbours;
+	vector<BoundBox> botNeighbours;
+
+
 
 	if (side == 0) // left border
 	{
@@ -407,10 +537,11 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 			if (CheckIfNeighbour(x_left_i, x_left_i, x_right_j, x_right_j) &&
 				CheckIfNeighbour(y_up_i, y_bot_i, y_up_j, y_bot_j))
 			{
-				return rankNeighbours[i].rank;
+				leftNeighbours.push_back(rankNeighbours[i]);
 			}
 		}
-		return -1;
+		
+		return leftNeighbours;
 	}
 
 	else if (side == 1) // top border
@@ -425,10 +556,11 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 			if (CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
 				CheckIfNeighbour(y_up_i, y_up_i, y_bot_j, y_bot_j))
 			{
-				return rankNeighbours[i].rank;
+				topNeighbours.push_back(rankNeighbours[i]);
 			}
 		}
-		return -1;
+
+		return topNeighbours;
 	}
 
 	else if (side == 2) // right border
@@ -443,10 +575,11 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 			if (CheckIfNeighbour(x_right_i, x_right_i, x_left_j, x_left_j) &&
 				CheckIfNeighbour(y_up_i, y_bot_i, y_up_j, y_bot_j))
 			{
-				return rankNeighbours[i].rank;
+				rightNeighbours.push_back(rankNeighbours[i]);
 			}
 		}
-		return -1;
+
+		return rightNeighbours;	
 	}
 
 	else if (side == 3) // bot border
@@ -461,15 +594,50 @@ int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, in
 			if (CheckIfNeighbour(x_left_i, x_right_i, x_left_j, x_right_j) &&
 				CheckIfNeighbour(y_bot_i, y_bot_i, y_up_j, y_up_j))
 			{
-				return rankNeighbours[i].rank;
+				botNeighbours.push_back(rankNeighbours[i]);
 			}
 		}
-		return -1;
+
+		return botNeighbours;	
 	}
 
 	else
 	{
-		cout << " Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
+		cout << " isThereANeighbour Invalid side was passed, use 0 for left, 1 for top, 2 for right and 3 for bottom." << endl;
 		throw std::exception();
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// Aux function, use to print neighbours
+///////////////////////////////////////////////////////////////////////////////////
+void printNeighbours(int rank, vector<vector<BoundBox>> neighbours)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		cout << "Rank: " << rank << "  Neighbour[" << i << "]: " << endl;
+		int n_size = neighbours[i].size();
+		vector<string> lados = {"left", "top", "right", "bottom"};
+		
+		cout << "	" << lados[i] << " vizinho(s):" << endl;
+		for(int h = 0; h < n_size; h++)
+		{
+			cout << "		 " <<  "neighbours[" << lados[i] << "][" << h << "].rank: " <<
+				neighbours[i][h].rank << endl;
+			
+			cout << "		 " <<  "neighbours[" << lados[i] << "][" << h << "].coordinateX: " <<
+				neighbours[i][h].coordinateX << endl;
+			
+			cout << "		 " <<  "neighbours[" << lados[i] << "][" << h << "].coordinateY: " <<
+				neighbours[i][h].coordinateY << endl;
+			
+			cout << "		 " <<  "neighbours[" << lados[i] << "][" << h << "].edgeX: " <<
+				neighbours[i][h].edgeX << endl;
+			
+			cout << "		 " <<  "neighbours[" << lados[i] << "][" << h << "]edgeY: " <<
+				neighbours[i][h].edgeY << endl;
+			
+		}
 	}
 }

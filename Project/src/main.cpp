@@ -176,10 +176,13 @@ int main(int argc, char *argv[])
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
+
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
-	imshow("image", recon);
+	//imshow("imgblock image "+to_string(rank), imgblock);
+	imshow("recon image "+to_string(rank), recon);
 	waitKey();
+	
 	// Finaliza programacao distribuida
 	MPI_Finalize();
 	return 0;

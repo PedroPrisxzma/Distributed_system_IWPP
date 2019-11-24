@@ -4,6 +4,8 @@
 #include <list>
 #include <omp.h>
 #include <iostream>
+using namespace std;
+
 #include <mpi.h>
 
 #include "MorphologicOperations.h"
@@ -28,7 +30,7 @@ inline void propagate(const Mat &image, Mat &output, std::queue<int> &xQ, std::q
 }
 
 template <typename T>
-Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQueue, std::queue<int> &yQueue)
+Mat imreconstruct(int rank, std::queue<int> &borderValues, const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQueue, std::queue<int> &yQueue)
 {
 	// Mat imreconstruct(const Mat& seeds, const Mat& image, int connectivity) {
 	CV_Assert(image.channels() == 1);
@@ -152,25 +154,31 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 		int xPoint;
 		int yPoint;
 		int queueSize = xQueue.size();
+	//	cout << "imagem dimensions: " << output.rows<< " " << output.cols <<endl;
 		for (int i = 0; i < queueSize; i++)
 		{
-		
-		---	xPoint = xQueue.front()==0 ? xQueue.front():xQueue.front()+1;
-			
-		---	yPoint = yQueue.front()==0 ? yQueue.front():yQueue.front()+1;
+
+			xPoint = xQueue.front()==0 ? xQueue.front() : xQueue.front()+1;//+1;
+			yPoint = yQueue.front()==0 ? yQueue.front() : yQueue.front()+1;//+1;
+
+			//cout << "colorindo borda rank: " << rank << endl;
+			//cout << "Coordenadas: " << xPoint << " " << yPoint << endl;
 			
 			oPtr = output.ptr<T>(yPoint);
-			oPtr[i] = 255;
-			
+
+			oPtr[xPoint] = borderValues.front();
 
 			xQ.push(xPoint);
 			yQ.push(yPoint);
+			
 			xQueue.pop();
 			yQueue.pop();
+			borderValues.pop();
 		}
-		imshow("image", input);
-		imshow("image", output);	
-		waitKey();
+
+		//imshow("image - input "+to_string(rank), input);
+		//imshow("image - output "+to_string(rank), output);	
+		//waitKey();
 	}
 	
 
@@ -264,11 +272,11 @@ Mat imreconstruct(const Mat &seeds, const Mat &image, int connectivity, std::que
 //template Mat imreconstructGeorge<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
 
 // template DllExport Mat imreconstruct<unsigned char>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<unsigned char>(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
+template DllExport Mat imreconstruct<unsigned char>(int rank, std::queue<int> &borderValues, const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
 
 // template DllExport Mat imreconstruct<unsigned short int>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<unsigned short int>(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
+template DllExport Mat imreconstruct<unsigned short int>(int rank, std::queue<int> &borderValues, const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
 
 // template DllExport Mat imreconstruct<float>(const Mat& seeds, const Mat& image, int connectivity);
-template DllExport Mat imreconstruct<float>(const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
+template DllExport Mat imreconstruct<float>(int rank, std::queue<int> &borderValues, const Mat &seeds, const Mat &image, int connectivity, std::queue<int> &xQ, std::queue<int> &yQ);
 } // namespace nscale

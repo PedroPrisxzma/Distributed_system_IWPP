@@ -41,7 +41,6 @@ void matsnd(Mat& m, int dest, int image_or_mask){
 	memcpy(buffer+(1 * sizeof(int)),(uchar*)&cols,sizeof(int));
 	memcpy(buffer+(2 * sizeof(int)),(uchar*)&type,sizeof(int));
 	memcpy(buffer+(3*sizeof(int)),m.data,bytes);
-	cout << "Mat rows: " << rows << " cols: " << cols << endl;
 
 	MPI_Send(buffer,bytes+3*sizeof(int),MPI_UNSIGNED_CHAR,dest, 0,MPI_COMM_WORLD);
 	free(buffer);
@@ -79,7 +78,6 @@ Mat matrcv(int src, int image_or_mask){
 	buffer = (uchar*) malloc(MAXBYTES);
 
 	MPI_Recv(buffer, MAXBYTES,MPI_UNSIGNED_CHAR,src,0,MPI_COMM_WORLD,&status);
-	cout << "image recive from " << src << endl;
 		
 	MPI_Get_count(&status,MPI_UNSIGNED_CHAR,&count);
 	

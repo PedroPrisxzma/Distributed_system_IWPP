@@ -7,13 +7,22 @@
 #include "../classes/imageChunk.h"
 
 Mat imReconstructAdm(Mat imgblock, Mat mskblock,BoundBox rankVertices, vector<BoundBox> rankNeighbours, int rank, int numeroDeProcessos);
+
 bool stopCondition(int rank, int numeroDeProcessos, int myState);
 int checkAllFinished(int myState, int rank, int numDeProcessos);
 void alertAllOtherProcesses(int state, int rank, int numeroDeProcessos);
-void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<int> neighbours);
+
+void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side);
+void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector<BoundBox>> neighbours, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues);
+
+void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRightBotBorders, vector<vector<BoundBox>> neighbours, BoundBox rankVertices);
+void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neighbourEdge, int &start, int &end);
+Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, int side);
+
 Mat extractBorders(Mat image, int side);
 vector<Mat> getBorders(Mat reconstructedImage);
-int isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, int side);
+vector<BoundBox> isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankNeighbours, int side);
+void printNeighbours(int rank, vector<vector<BoundBox>> neighbours);
 
 
 
