@@ -222,10 +222,13 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// top
 	else if(side == 1)
 	{
+		//imshow("borda", receivedBorder);
+		//swaitKey();
 		int pointX;
 		int pointY = 0;
 		for (pointX = 0; pointX < imgBorderSize; pointX++)
 		{
+			//cout << rank <<":	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
 			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY))
 			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
 			{
@@ -260,18 +263,28 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// bot
 	else if(side == 3)
 	{
+		imshow("borda", receivedBorder);
+		waitKey();
+		for(int i = 0; i < receivedBorder.rows; i++)
+		{
+			for(int j = 0; j < receivedBorder.cols; j++)
+			{
+				cout << "pixel" << "(" << i << ", "<< j << ")"<< endl;
+				cout << "  Value: " << (int)receivedBorder.at<uchar>(i, j) << endl;
+			}
+		}
 		int pointX;
 		int pointY = rankVertices.edgeY;
 		for (pointX = 0; pointX < imgBorderSize; pointX++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY-1))
+			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY))
 			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
 			{
 				xQueue.push(pointX);
 				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY-1));
+				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
 				cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
-				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY-1) << endl;
+				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
 			}	
 		}
 	}
@@ -298,7 +311,7 @@ void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector
 			int recebimentoBorda;
 			Mat receivedBorder;
 			MPI_Recv(&recebimentoBorda, 1, MPI_INT, neighbours[i][j].rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			cout << rank <<": recebimentoBorda = " << recebimentoBorda << endl;
+			//cout << rank <<": recebimentoBorda = " << recebimentoBorda << endl;
 			if (recebimentoBorda == 1)
 			{
 				receivedBorder = matrcv(neighbours[i][j].rank, 0);
@@ -367,8 +380,8 @@ void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neig
 	int endCoordinate = coordinate + edge;
 	int endNeighbourCoordinate = neighbourCoordinate + neighbourEdge;
 
-	cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
-	cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
+	//cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
+	//cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
 	
 	
 	start = coordinate > neighbourCoordinate ? coordinate : neighbourCoordinate;
@@ -378,7 +391,7 @@ void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neig
 	start = start - coordinate;
 	end = end - coordinate -1;
 
-	cout << "		Conclusion: " << start << " to " << end <<endl;
+	//cout << "		Conclusion: " << start << " to " << end <<endl;
 }
 
 // Get intersection exemple
@@ -420,7 +433,7 @@ Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, i
 	{
 		int start, end;
 		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
-		cout<< "Left: " << "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
+	//	cout<< "Left: " << "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
 		cutBorder = borderToCut(Rect(0, start, 1, end));
 	}
 
@@ -428,7 +441,7 @@ Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, i
 	{
 		int start, end;
 		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
-		cout << "Top: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
+	//	cout << "Top: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
 		cutBorder = borderToCut(Rect(start, 0, end, 1));
 	}
 
@@ -436,7 +449,7 @@ Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, i
 	{
 		int start, end;
 		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
-		cout << "Right: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
+	//	cout << "Right: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
 		cutBorder = borderToCut(Rect(0, start, 1, end));
 
 	}
@@ -445,7 +458,7 @@ Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, i
 	{
 		int start, end;
 		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
-		cout << "Bot: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
+	//	cout << "Bot: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
 		cutBorder = borderToCut(Rect(start, 0, end, 1));
 	}
 
