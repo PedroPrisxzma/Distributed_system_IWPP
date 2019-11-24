@@ -6,6 +6,8 @@ using namespace std;
 
 #include <omp.h>
 #include <mpi.h>
+#include <sys/time.h>
+
 
 #include <opencv2/opencv.hpp>
 using namespace cv;
@@ -22,6 +24,8 @@ int main(int argc, char *argv[])
 {
 	int numeroDeProcessos, rank;
 	int data_size;
+    struct timeval start_time, end_time;
+
 	// ImageChunk imageChunk;
 	Mat imgblock;
 	Mat mskblock;
@@ -62,6 +66,9 @@ int main(int argc, char *argv[])
 			cout << " Usage: mpiexec -n <process_number> ./main <marker> <mask>" << endl;
 			throw std::exception();
 		}
+		// Inicia a contagem do tempo
+		gettimeofday(&start_time, NULL);
+
 
 		inputImage = image_reader(argv[1]);
 		Mat inputMask = image_reader(argv[2]);
@@ -156,6 +163,11 @@ int main(int argc, char *argv[])
 
 		// imshow("reconstruct image FINAL", output);
 		// waitKey();
+		
+		// Encerra a contagem do tempo
+		gettimeofday(&end_time, NULL);
+		printf("%.1f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e3);
+
 		imwrite("result.png",output);
 	}
 	else
