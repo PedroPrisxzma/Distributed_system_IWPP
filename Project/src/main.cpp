@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
 			// Envia as imagens
 			matsnd(imageBlocks.vetorDeImagens[i], i, 0);
 			matsnd(imageBlocks.vetorDeMascaras[i], i, 1);
+			
+			
+			//imwrite(imageBlocks.vetorDeImagens[i], "Reconstruct_image_"+to_string(i));
+			//imwrite(imageBlocks.vetorDeMascaras[i], "Reconstruct_mask_"+to_string(i));
 		}
 
 		memcpy(rankVertices, &vert_list[0], sizeof(BoundBox));
@@ -131,9 +135,9 @@ int main(int argc, char *argv[])
 	//////////////////////////////////////////////////////////////////////////////////////
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
-	//imshow("imgblock image "+to_string(rank), imgblock);
-	//imshow("recon image "+to_string(rank), recon);
-	//waitKey();
+	imshow("imgblock image "+to_string(rank), imgblock);
+	imshow("recon image "+to_string(rank), recon);
+	waitKey();
 
 	if (rank == 0)
 	{

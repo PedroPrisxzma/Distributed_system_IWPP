@@ -80,10 +80,10 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
         // cout << vetorDeBlocos->vetorDeImagens.size()     << endl;
         //cout << grid_rect << endl;
         
-        // rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
-        // imshow("image", image);
-        // imshow(format("grid(%d,%d)-(%d,%d)", vertices.coordinateX,vertices.coordinateY, vertices.rightSide, vertices.coordinateY2), image(grid_rect));
-        // waitKey();
+        //rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
+        //imshow("image", image);
+        //imshow(format("grid(%d,%d)-(%d,%d)", vertices.coordinateX,vertices.coordinateY, vertices.edgeX, vertices.edgeY), image(grid_rect));
+        //waitKey();
         
         return;
     }
