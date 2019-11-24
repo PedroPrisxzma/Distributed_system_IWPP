@@ -60,7 +60,6 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
 		vector<vector<BoundBox>> neighbours = {leftNeighbour, topNeighbour, rightNeighbour, botNeighbour};
 		
-		
 		if(false)
 		{
 			printNeighbours(rank, neighbours);
@@ -233,7 +232,9 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 				xQueue.push(pointX);
 				yQueue.push(pointY);
 				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
-			//	cout << rank << ":	ADD top point (" << pointX << "," << pointY <<")" << endl;
+				cout << rank << ":	ADD top point (" << pointX << "," << pointY <<")" << endl;
+				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
+
 			}
 		}
 	}
@@ -269,7 +270,8 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 				xQueue.push(pointX);
 				yQueue.push(pointY);
 				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY-1));
-				//cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
+				cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
+				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY-1) << endl;
 			}	
 		}
 	}

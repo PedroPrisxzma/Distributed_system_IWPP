@@ -44,31 +44,7 @@ void matsnd(Mat& m, int dest, int flag){
 
 	MPI_Send(buffer,bytes+3*sizeof(int),MPI_UNSIGNED_CHAR,dest, flag,MPI_COMM_WORLD);
 	free(buffer);
-	// if(flag == 0)
-	// {
-	//	 memcpy(&buffer_image[0 * sizeof(int)],(uchar*)&rows,sizeof(int));
-	//	 memcpy(&buffer_image[1 * sizeof(int)],(uchar*)&cols,sizeof(int));
-	//	 memcpy(&buffer_image[2 * sizeof(int)],(uchar*)&type,sizeof(int));
-		
-	//	 memcpy(&buffer_image[3*sizeof(int)],m.data,bytes);
-		
-	//	 MPI_Ssend(&buffer_image,bytes+3*sizeof(int),MPI_UNSIGNED_CHAR,dest, flag,MPI_COMM_WORLD);
-	// }
-	// else if(flag == 1)
-	// {
-	//	 memcpy(&buffer_mask[0 * sizeof(int)],(uchar*)&rows,sizeof(int));
-	//	 memcpy(&buffer_mask[1 * sizeof(int)],(uchar*)&cols,sizeof(int));
-	//	 memcpy(&buffer_mask[2 * sizeof(int)],(uchar*)&type,sizeof(int));
-
-	//	 memcpy(&buffer_mask[3*sizeof(int)],m.data,bytes);
-		
-	//	 MPI_Ssend(&buffer_mask,bytes+3*sizeof(int),MPI_UNSIGNED_CHAR,dest, flag,MPI_COMM_WORLD);
-	// }
-	// else
-	// {
-	//	 cout << "Invalid flag parameter passed, must be 0 for image and 1 for mask" << endl;
-	//	 throw std::exception();	
-	// }
+	
 }
 
 Mat matrcv(int src, int flag){
@@ -89,46 +65,5 @@ Mat matrcv(int src, int flag){
 	free(buffer);
 	return received_image;
 
-	// if(flag == 0)
-	// {
-		// MPI_Recv(&buffer_image, sizeof(buffer_image),MPI_UNSIGNED_CHAR,src,flag,MPI_COMM_WORLD,&status);
-		
-		// MPI_Get_count(&status,MPI_UNSIGNED_CHAR,&count);
-		
-		// memcpy((uchar*)&rows,&buffer_image[0 * sizeof(int)], sizeof(int));
-		// memcpy((uchar*)&cols,&buffer_image[1 * sizeof(int)], sizeof(int));
-		// memcpy((uchar*)&type,&buffer_image[2 * sizeof(int)], sizeof(int));
-
-		// cout << "matrcv: Count=" << count << endl;
-		// cout << "matrcv: rows=" << rows << endl;
-		// cout << "matrcv: cols=" << cols << endl;
-		// cout << "matrcv: type=" << type << endl;
-
-		// Make the mat
-		// Mat received_image = Mat(rows,cols,type,(uchar*)&buffer_image[3*sizeof(int)]);
-		//imshow("image "+to_string(flag), received_image);
-		//waitKey();
-		// return received_image;
-	// }
-	// else if(flag == 1)
-	// {
-	//	 MPI_Recv(&buffer_mask,sizeof(buffer_mask),MPI_UNSIGNED_CHAR,src,flag,MPI_COMM_WORLD,&status);
-		
-	//	 MPI_Get_count(&status,MPI_UNSIGNED_CHAR,&count);
-
-	//	 memcpy((uchar*)&rows,&buffer_mask[0 * sizeof(int)], sizeof(int));
-	//	 memcpy((uchar*)&cols,&buffer_mask[1 * sizeof(int)], sizeof(int));
-	//	 memcpy((uchar*)&type,&buffer_mask[2 * sizeof(int)], sizeof(int));
-
-	//	 // Make the mat
-	//	 Mat received_mask = Mat(rows,cols,type,(uchar*)&buffer_mask[3*sizeof(int)]);
-	//	 //imshow("image "+to_string(flag), received_mask);
-	//	 //waitKey();
-	//	 return received_mask;
-	// }
-	// else
-	// {
-	//	 cout << "Invalid flag parameter passed, must be 0 for image and 1 for mask" << endl;
-	//	 throw std::exception();	
-	// }
+	
 }

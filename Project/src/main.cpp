@@ -185,8 +185,8 @@ int main(int argc, char *argv[])
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
 	//imshow("imgblock image "+to_string(rank), imgblock);
-	// imshow("recon image "+to_string(rank), recon);
-	// waitKey();
+	imshow("recon image "+to_string(rank), recon);
+	waitKey();
 
 	if (rank == 0)
 	{
