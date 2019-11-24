@@ -60,8 +60,6 @@ ImageChunk separate_image(Mat image, Mat mask, int numProcessos)
 
 void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBlocos, int numProcessos)
 {
-    //TODO:
-    // Mudar para conter no máximo um número de divisões determinado pelo número de nós no sistema
     int factor, numProcessos_1, numProcessos_2;
 
     if (numProcessos == 0 || vertices.edgeX == 0 || vertices.edgeY == 0 )
@@ -80,7 +78,7 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
         Rect grid_rect(vertices.coordinateX, vertices.coordinateY, vertices.edgeX, vertices.edgeY);
         // cout << vetorDeBlocos->vetorDeVertices.size()     << endl;
         // cout << vetorDeBlocos->vetorDeImagens.size()     << endl;
-        cout << grid_rect << endl;
+        //cout << grid_rect << endl;
         
         // rectangle(image, grid_rect, Scalar(rand() % 256, rand() % 256, rand() % 256), 1);
         // imshow("image", image);
@@ -98,8 +96,8 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
     else
     {
     // Usar rand() para cortes irregulares
-        factor = 2 ;
-        //factor = 2+ (rand() % (numProcessos - 1));
+        //factor = 2 ;
+        factor = 2+ (rand() % (numProcessos - 1));
         
         numProcessos_1 = numProcessos/factor;
         numProcessos_2 = numProcessos - numProcessos_1;

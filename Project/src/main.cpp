@@ -20,24 +20,6 @@ using namespace cv;
 
 int main(int argc, char *argv[])
 {
-	// **** Testar o arquivo nscale/src/segment/test/src/imreconTest.cpp  ****
-	// Para entender a reconstrucao morfologica
-
-	// Separate the image, must be flexible,
-	// allowing to separate into same size or diferent sized smaller chunks
-
-	// Store references to the image's corners
-	// Neighbours vector BoundBox
-	// Send borders interssections
-
-	// Allocate MPI object
-	// Send the image to the available machines, to execute the IWPP
-	// When hiting a corner must comunicate with it's neighbours
-
-	//Stop condition, possibilities:
-	// Either broadcast to all nodes
-	// Broadcast to a node (in a ring like fashion) until all have finished
-
 	int numeroDeProcessos, rank;
 	int data_size;
 	// ImageChunk imageChunk;
@@ -49,7 +31,7 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &numeroDeProcessos);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
- /* create a type for struct car */
+ 	/* create a type for struct BoundBox, allowing to send them throw MPI */
 	const int nitems=5;
 	int		  blocklengths[5] = {1,1,1,1,1};
 	MPI_Datatype types[5] = {MPI_INT, MPI_INT,MPI_INT, MPI_INT,MPI_INT};
@@ -83,7 +65,7 @@ int main(int argc, char *argv[])
 
 		inputImage = image_reader(argv[1]);
 		Mat inputMask = image_reader(argv[2]);
-		cout << inputImage.size << endl;
+		//cout << inputImage.size << endl;
 
 		ImageChunk imageBlocks = separate_image(inputImage, inputMask, numeroDeProcessos);
 
@@ -96,28 +78,14 @@ int main(int argc, char *argv[])
 			vert_list[i].edgeY = imageBlocks.vetorDeVertices[i].edgeY;
 			vert_list[i].rank = i;
 
-			cout << "Rank: "<<vert_list[i].rank<<endl;
-			cout << "Coordinate x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
-			cout << "Size x: "<<vert_list[i].edgeX<<" y: "<<vert_list[i].edgeY<<endl;
+			//cout << "Rank: "<<vert_list[i].rank<<endl;
+			//cout << "Coordinate x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
+			//cout << "Size x: "<<vert_list[i].edgeX<<" y: "<<vert_list[i].edgeY<<endl;
 
 		}
 
 		// Acha vizinhos dos Chunks de imagens
 		vizinhos = FindNeighbours(vert_list, numeroDeProcessos, 4);
-		// cout << "---------------------------------" << endl;
-		//for (int i = 0; i < numeroDeProcessos; i++)
-		//{
-			// cout << "Vizinhos de: " << i << endl;
-			// cout << "I -> cX: " << vert_list[i].coordinateX << " cY: " << vert_list[i].coordinateY << " eX: " << vert_list[i].edgeX << " eY: " << vert_list[i].edgeY << endl;
-			// cout << " --------------------------- " << vizinhos[i].size() << endl;
-
-		//	int currentVizinhosLenght = vizinhos[i].size();
-		//	for (int j = 0; j < currentVizinhosLenght; j++)
-		//	{
-				// cout << "J -> cX: " << vizinhos[i][j].coordinateX << " cY: " << vizinhos[i][j].coordinateY << " eX: " << vizinhos[i][j].edgeX << " eY: " << vizinhos[i][j].edgeY << endl;
-				// cout << endl;
-		//	}
-		//}
 
 		for (int i = 1; i < numeroDeProcessos; i++)
 		{
@@ -141,8 +109,6 @@ int main(int argc, char *argv[])
 		rankNeighbours = vizinhos[0];
 		imgblock = Mat(imageBlocks.vetorDeImagens[0]).clone();
 		mskblock = Mat(imageBlocks.vetorDeMascaras[0]).clone();
-
-		// free(vert_list);
 	}
 	else
 	{
@@ -160,33 +126,14 @@ int main(int argc, char *argv[])
 		mskblock = matrcv(0, 1);
 	}
 
-	//cout << "Rank: " << rank << ":" << rankVertices->rank << " vertices x: " << rankVertices->coordinateX << 
-	//" y: " << rankVertices->coordinateY << " ex: " << rankVertices->edgeX << " ey: " << rankVertices->edgeY <<  endl;
-
-	// int size = rankNeighbours.size();
-	// for (int i = 0; i < size; i++)
-	// {
-	// 	cout << "Rank: " << rank << "  rankNeighbour[" << i << "].rank: " << rankNeighbours[i].rank << endl;
-	// 	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaX: " << rankNeighbours[i].coordinateX << endl;
-	// 	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].coordenadaY: " << rankNeighbours[i].coordinateY << endl;
-	// 	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeX: " << rankNeighbours[i].edgeX << endl;
-	// 	cout << "	Rank: " << rank << "  rankNeighbour[" << i << "].edgeY: " << rankNeighbours[i].edgeY << endl;
-	// }
-
-	// imshow("image final "+to_string(rank), imgblock);
-	// waitKey();
-
-	// imshow("mask final "+to_string(rank), mskblock);
-	// waitKey();
-
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Morphological alg
-
+	//////////////////////////////////////////////////////////////////////////////////////
 	Mat recon = imReconstructAdm(imgblock, mskblock, *rankVertices, rankNeighbours, rank, numeroDeProcessos);
 
 	//imshow("imgblock image "+to_string(rank), imgblock);
-	imshow("recon image "+to_string(rank), recon);
-	waitKey();
+	//imshow("recon image "+to_string(rank), recon);
+	//waitKey();
 
 	if (rank == 0)
 	{
@@ -194,13 +141,13 @@ int main(int argc, char *argv[])
 		for (int i = 1; i < numeroDeProcessos; i++)
 		{
 			Mat recive =  matrcv(i,5);
-			cout << "Copy to x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
+			//cout << "Copy to x: "<<vert_list[i].coordinateX<<" y: "<<vert_list[i].coordinateY<<endl;
 			recive.copyTo(output(cv::Rect(vert_list[i].coordinateX,vert_list[i].coordinateY,recive.cols, recive.rows)));
-		// imshow("reconstruct image FINAL", output);
-		// waitKey();
+		//  imshow("reconstruct image FINAL", output);
+		//  waitKey();
 		}
 
-		cout << "Copy to x: "<<vert_list[0].coordinateX<<" y: "<<vert_list[0].coordinateY<<endl;
+		//cout << "Copy to x: "<<vert_list[0].coordinateX<<" y: "<<vert_list[0].coordinateY<<endl;
 		recon.copyTo(output(cv::Rect(0,0,recon.cols, recon.rows)));
 
 		imshow("reconstruct image FINAL", output);
@@ -214,11 +161,23 @@ int main(int argc, char *argv[])
 	
 	// Finaliza programacao distribuida
 	MPI_Finalize();
+	free(rankVertices);
+	free(vert_list);
 	return 0;
 }
 
-// Perguntar:
-// Ao separar os blocos da imagem, devem ser referencias ou copias?
-// Ao terminar, devo juntar os blocos processados numa imagem?
+	// Separate the image, must be flexible,
+	// allowing to separate into same size or diferent sized smaller chunks
 
-// ---> tem que ser cópia, referencia não funciona. Ao terminar, tem que juntar de volta a imagem.
+	// Store references to the image's corners
+	// Neighbours vector BoundBox
+	// Send borders interssections
+
+	// Allocate MPI object
+	// Send the image to the available machines, to execute the IWPP
+	// When hiting a corner must comunicate with it's neighbours
+
+	// Stop condition, possibilities:
+	// Either broadcast to all nodes
+	// Broadcast to a node (in a ring like fashion) until all have finished
+	// One process in charge of alerting the others, master-slaves kind of

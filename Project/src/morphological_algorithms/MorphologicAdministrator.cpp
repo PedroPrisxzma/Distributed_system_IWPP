@@ -21,9 +21,6 @@ using namespace cv;
 Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<BoundBox> rankNeighbours, int rank, int numeroDeProcessos)
 {
 
-	// MPI_Request request;
-	// MPI_Status status;
-
 	std::queue<int> xQueue;
 	std::queue<int> yQueue;
 	std::queue<int>  borderValues;
@@ -42,15 +39,16 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 	int connectivity = 4;
 	while (true)
 	{	
-		// REMOVE COMENTARIO:
-		// Works only for up to 4 neighbours, one on each side
+
 		vector<BoundBox> leftNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 0);
 		vector<BoundBox> topNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 1);
 		vector<BoundBox> rightNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 2);
 		vector<BoundBox> botNeighbour = isThereANeighbour(rankVertices, rankNeighbours, 3);
 
 		if(connectivity == 4)
-			removeDiagnals(leftNeighbour, topNeighbour, rightNeighbour, botNeighbour);
+		{
+		//	removeDiagnals(leftNeighbour, topNeighbour, rightNeighbour, botNeighbour);
+		}
 		
 		else if(connectivity == 8)
 		{
@@ -84,29 +82,27 @@ Mat imReconstructAdm(Mat imgblock, Mat mskblock, BoundBox rankVertices, vector<B
 
 		int myState = xQueue.empty() ? 1 : -1;
 
-		// Se as filas xQueue e yQueue não estiverem vazias
+		//cout << rank << ": MEU ESTADO É " << myState << endl;
 		
-		cout << rank << ": MEU ESTADO É " << myState << endl;
-		
+		// Se as filas xQueue e yQueue não estiverem vazias, continua processos
 		if(myState == -1)
 		{
 			reconstructedImage = nscale::imreconstruct<unsigned char>(rank, borderValues, reconstructedImage, mskblock, 4, xQueue, yQueue);
 			leftTopRightBotBorders = getBorders(reconstructedImage);
 		}
 		
-		// Notificar rank 0 que não acabou, rank 0 deve então pedir para todos que acabaram
-		// rodarem de novo, pq alguem não acabou.
+		// On Stop condition, what it does:
+			// Notificar rank 0 que não acabou, rank 0 deve então pedir para todos que acabaram
+			// rodarem de novo, pq alguem não acabou.
 
-		// Se estiverem vazias, notificar processo 0, que "Acabei"
-		// esperar ser notificado pelo processo 0 que todos acabaram,
-		// ou que devo tentar processar denovo
-
+			// Se estiverem vazias, notificar processo 0, que "Acabei"
+			// esperar ser notificado pelo processo 0 que todos acabaram,
+			// ou que devo tentar processar denovo
 		if(stopCondition(rank, numeroDeProcessos, myState))
 		{
 			break;
 		}
-		// cout << "Sou o processo: " << rank << endl;
-		// getchar();
+
 	}
 
 	return reconstructedImage;
@@ -123,8 +119,6 @@ bool stopCondition(int rank, int numeroDeProcessos, int myState)
 
 	if (rank == 0)
 	{
-		// TODO:
-		// Depois de feito os demais TODOs, Administrar fim no rank 0
 		int finished = checkAllFinished(myState, rank, numeroDeProcessos);
 		
 		alertAllOtherProcesses(finished, rank, numeroDeProcessos);
@@ -199,8 +193,8 @@ void  alertAllOtherProcesses(int state, int rank, int numeroDeProcessos)
 ///////////////////////////////////////////////////////////////////////////////////
 void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, BoundBox neighbour, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side)
 {
-	//int imgBorderSize = receivedBorder.rows * receivedBorder.cols;
-	
+	// Iinitial pixel is used to determine where on the image the propagated border fits.
+
 	// left
 	if(side == 0)
 	{
@@ -336,7 +330,7 @@ void receiveBordersFromNeighbours(int rank, BoundBox rankVertices, vector<vector
 			if (recebimentoBorda == 1)
 			{
 				receivedBorder = matrcv(neighbours[i][j].rank, 0);
-				cout << "Rank: " << rank << " received border from Rank: " << neighbours[i][j].rank << endl;
+				//cout << "Rank: " << rank << " received border from Rank: " << neighbours[i][j].rank << endl;
 			
 				addReceivedBorderCoordinatesToQueue(rank, rankVertices, neighbours[i][j], receivedBorder, xQueue, yQueue, borderValues, i);
 				
@@ -401,8 +395,8 @@ void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neig
 	int endCoordinate = coordinate + edge;
 	int endNeighbourCoordinate = neighbourCoordinate + neighbourEdge;
 
-	cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
-	cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
+	//cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
+	//cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
 	
 	
 	start = coordinate > neighbourCoordinate ? coordinate : neighbourCoordinate;
@@ -412,7 +406,7 @@ void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neig
 	size = end - start;
 	start = start - coordinate;
 
-	cout << "		Conclusion: " << start << " to " << end - coordinate << " size: " << size <<endl;
+	//cout << "		Conclusion: " << start << " to " << end - coordinate << " size: " << size <<endl;
 }
 
 // Get intersection exemple
@@ -646,7 +640,7 @@ vector<BoundBox> isThereANeighbour(BoundBox rankVertices, vector<BoundBox> rankN
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Aux function, use to print neighbours
+// Aux function, use to print neighbours, rank indicates current node/process
 ///////////////////////////////////////////////////////////////////////////////////
 void printNeighbours(int rank, vector<vector<BoundBox>> neighbours)
 {
