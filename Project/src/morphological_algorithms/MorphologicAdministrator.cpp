@@ -199,22 +199,28 @@ void  alertAllOtherProcesses(int state, int rank, int numeroDeProcessos)
 ///////////////////////////////////////////////////////////////////////////////////
 void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat receivedBorder, std::queue<int> &xQueue, std::queue<int> &yQueue, std::queue<int> &borderValues, int side)
 {
-	int imgBorderSize = receivedBorder.rows * receivedBorder.cols;
+	//int imgBorderSize = receivedBorder.rows * receivedBorder.cols;
 	
 	// left
 	if(side == 0)
 	{
-		int pointX = 0;
-		int pointY;
-		for (pointY = 0; pointY < imgBorderSize; pointY++)
+		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(0, pointY))
-			//if (0 < (int)receivedBorder.at<uchar>(0, pointY))
+			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
 			{
-				xQueue.push(pointX);
-				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
-				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+				int pixelValue = (int)receivedBorder.at<uchar>(pointY, pointX);
+				//cout << "pixel" << "(" << pointX << ", "<< pointY << ")"<< endl;
+				//cout << "  Value: " << pixelValue << endl;
+
+				if(pixelValue == 255)
+				{
+					//cout << rank <<":	ADD top point (" << pointX << "," << pointY <<")" << endl;
+					//cout << "	Value:"<< pixelValue << endl;
+					xQueue.push(pointX);
+					yQueue.push(pointY);
+					borderValues.push(pixelValue);
+
+				}
 			}
 		}
 	}
@@ -222,22 +228,23 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// top
 	else if(side == 1)
 	{
-		//imshow("borda", receivedBorder);
-		//swaitKey();
-		int pointX;
-		int pointY = 0;
-		for (pointX = 0; pointX < imgBorderSize; pointX++)
+		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
-			//cout << rank <<":	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
-			if (255 == (int)receivedBorder.at<uchar>(pointX, pointY))
-			//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
+			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
 			{
-				xQueue.push(pointX);
-				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
-				cout << rank << ":	ADD top point (" << pointX << "," << pointY <<")" << endl;
-				cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
+				int pixelValue = (int)receivedBorder.at<uchar>(pointY, pointX);
+				//cout << "pixel" << "(" << pointX << ", "<< pointY << ")"<< endl;
+				//cout << "  Value: " << pixelValue << endl;
 
+				if(pixelValue == 255)
+				{
+					//cout << rank <<":	ADD top point (" << pointX << "," << pointY <<")" << endl;
+					//cout << "	Value:"<< pixelValue << endl;
+					xQueue.push(pointX);
+					yQueue.push(pointY);
+					borderValues.push(pixelValue);
+
+				}
 			}
 		}
 	}
@@ -245,17 +252,23 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// right
 	else if(side == 2)
 	{
-		int pointX = rankVertices.edgeX;
-		int pointY;
-		for (pointY = 0; pointY < imgBorderSize; pointY++)
+		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
-			if (255 == (int)receivedBorder.at<uchar>(pointX-1, pointY))
-			//if (0 < (int)receivedBorder.at<uchar>(0, pointY))
+			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
 			{
-				xQueue.push(pointX);
-				yQueue.push(pointY);
-				borderValues.push((int)receivedBorder.at<uchar>(pointX-1, pointY));
-				// cout << "ADD point (" << pointX << "," << pointY <<")" << endl;
+				int pixelValue = (int)receivedBorder.at<uchar>(pointY, pointX);
+				//cout << "pixel" << "(" << pointX + rankVertices.edgeX<< ", "<< pointY << ")"<< endl;
+				//cout << "  Value: " << pixelValue << endl;
+
+				if(pixelValue == 255)
+				{
+					//cout << rank <<":	ADD top point (" << pointX + rankVertices.edgeX << "," << pointY <<")" << endl;
+					//cout << "	Value:"<< pixelValue << endl;
+					xQueue.push(pointX + rankVertices.edgeX);
+					yQueue.push(pointY);
+					borderValues.push(pixelValue);
+
+				}
 			}
 		}
 	}
@@ -263,20 +276,18 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 	// bot
 	else if(side == 3)
 	{
-		imshow("borda", receivedBorder);
-		waitKey();
 		for(int pointY = 0; pointY < receivedBorder.rows; pointY++)
 		{
 			for(int pointX = 0; pointX < receivedBorder.cols; pointX++)
 			{
 				int pixelValue = (int)receivedBorder.at<uchar>(pointY, pointX);
-				cout << "pixel" << "(" << pointX << ", "<< pointY << ")"<< endl;
-				cout << "  Value: " << pixelValue << endl;
+				//cout << "pixel" << "(" << pointX << ", "<< pointY << ")"<< endl;
+				//cout << "  Value: " << pixelValue << endl;
 
 				if(pixelValue == 255)
 				{
-					cout << rank <<":	ADD bot point (" << pointX << "," << + rankVertices.edgeY <<")" << endl;
-					cout << "	Value:"<< pixelValue << endl;
+					//cout << rank <<":	ADD bot point (" << pointX << "," << pointY+ rankVertices.edgeY <<")" << endl;
+					//cout << "	Value:"<< pixelValue << endl;
 					xQueue.push(pointX);
 					yQueue.push(pointY + rankVertices.edgeY);
 					borderValues.push(pixelValue);
@@ -285,20 +296,6 @@ void addReceivedBorderCoordinatesToQueue(int rank, BoundBox rankVertices, Mat re
 			}
 		}
 
-		//int pointX;
-		//int pointY = rankVertices.edgeY;
-		//for (pointX = 0; pointX < imgBorderSize; pointX++)
-		//{
-		//	if (255 == (int)receivedBorder.at<uchar>(pointY, pointX))
-		//	//if (0 < (int)receivedBorder.at<uchar>(pointX, 0))
-		//	{
-		//		xQueue.push(pointX);
-		//		yQueue.push(pointY);
-		//		borderValues.push((int)receivedBorder.at<uchar>(pointX, pointY));
-		//		cout << rank <<":	ADD bot point (" << pointX << "," << pointY <<")" << endl;
-		//		cout << "	Value:"<< (int)receivedBorder.at<uchar>(pointX, pointY) << endl;
-		//	}	
-		//}
 	}
 
 	else
@@ -387,23 +384,23 @@ void sendBorderToNeighbours(vector<Mat> previousBorders, vector<Mat> leftTopRigh
 }
 
 // Find start and end of an intersection on the border
-void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neighbourEdge, int &start, int &end)
+void getIntersection(int coordinate, int edge, int neighbourCoordinate, int neighbourEdge, int &start, int &size)
 {
 	int endCoordinate = coordinate + edge;
 	int endNeighbourCoordinate = neighbourCoordinate + neighbourEdge;
 
-	//cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
-	//cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
+	cout << "finding intersection between: " << coordinate << " to " << endCoordinate <<endl;
+	cout << "	and " << neighbourCoordinate << " to " << endNeighbourCoordinate <<	endl;
 	
 	
 	start = coordinate > neighbourCoordinate ? coordinate : neighbourCoordinate;
-	end = endCoordinate < endNeighbourCoordinate ? endCoordinate : endNeighbourCoordinate;
+	int end = endCoordinate < endNeighbourCoordinate ? endCoordinate : endNeighbourCoordinate;
 
 	// Maps the originals to a start point at 0, to use on the border image
+	size = end - start;
 	start = start - coordinate;
-	end = end - coordinate -1;
 
-	//cout << "		Conclusion: " << start << " to " << end <<endl;
+	cout << "		Conclusion: " << start << " to " << end - coordinate << " size: " << size <<endl;
 }
 
 // Get intersection exemple
@@ -443,35 +440,35 @@ Mat cutIntersection(Mat borderToCut, BoundBox rankVertice, BoundBox neighbour, i
 	
 	if (side == 0) // left border
 	{
-		int start, end;
-		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
+		int start, size;
+		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, size);
 	//	cout<< "Left: " << "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
-		cutBorder = borderToCut(Rect(0, start, 1, end));
+		cutBorder = borderToCut(Rect(0, start, 1, size));
 	}
 
 	else if (side == 1) // top border
 	{
-		int start, end;
-		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
+		int start, size;
+		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, size);
 	//	cout << "Top: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
-		cutBorder = borderToCut(Rect(start, 0, end, 1));
+		cutBorder = borderToCut(Rect(start, 0, size, 1));
 	}
 
 	else if (side == 2) // right border
 	{
-		int start, end;
-		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, end);
+		int start, size;
+		getIntersection(rankVertice.coordinateY, rankVertice.edgeY, neighbour.coordinateY, neighbour.edgeY, start, size);
 	//	cout << "Right: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.rows << endl;
-		cutBorder = borderToCut(Rect(0, start, 1, end));
+		cutBorder = borderToCut(Rect(0, start, 1, size));
 
 	}
 
 	else if (side == 3) // bot border
 	{
-		int start, end;
-		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, end);
+		int start, size;
+		getIntersection(rankVertice.coordinateX, rankVertice.edgeX, neighbour.coordinateX, neighbour.edgeX, start, size);
 	//	cout << "Bot: "<< "Start "<< start << " End: " << end << " end-start: " << end - start  <<" vs " <<  borderToCut.cols << endl;
-		cutBorder = borderToCut(Rect(start, 0, end, 1));
+		cutBorder = borderToCut(Rect(start, 0, size, 1));
 	}
 
 	else

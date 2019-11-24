@@ -176,9 +176,12 @@ Mat imreconstruct(int rank, std::queue<int> &borderValues, const Mat &seeds, con
 			borderValues.pop();
 		}
 
-		imshow("image - input "+to_string(rank), input);
-		imshow("image - output "+to_string(rank), output);	
-		waitKey();
+		if(rank == 4 or rank == 3 or rank == 2)
+		{
+			//imshow("image - input "+to_string(rank), input);
+			imshow("image - output "+to_string(rank), output);	
+			waitKey();
+		}
 	}
 	
 

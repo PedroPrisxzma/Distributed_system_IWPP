@@ -110,9 +110,9 @@ void slice_image(Mat image, Mat mask, Vertices vertices, ImageChunk *vetorDeBloc
         //cout <<"..numProcessos_2: "<< numProcessos_2 << endl;
 
     // Usar (vertices.edgeX < vertices.edgeY) para cortar na horizontal e vertical
-    if (true) // corta so horizontal
+    //if (true) // corta so horizontal
     //if(false) // corta so vertical
-    //if (vertices.edgeX < vertices.edgeY)
+    if (vertices.edgeX < vertices.edgeY)
     {
         //cout << "valor de divisao:" << factor << endl
              //<< "TamanhoY " << vertices.edgeY << endl;
